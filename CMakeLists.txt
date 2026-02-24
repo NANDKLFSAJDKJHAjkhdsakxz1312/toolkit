@@ -18,12 +18,12 @@ set(CMAKE_AUTORCC ON)
 
 set(LOCAL_LIBRARY_BASE "/home/root/software")
 set(QT5_PATH "${LOCAL_LIBRARY_BASE}/qt5.15.18_install")
-
 list(APPEND CMAKE_PREFIX_PATH ${QT5_PATH})
 
 find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED)
 qt_add_resources(RESOURCES resources.qrc)
 
+# add_executable -> target_include_directories -> target_link_libraries
 add_executable(demo
     demo/mainwindow.ui
     demo/mainwindow.h
@@ -45,10 +45,4 @@ target_link_libraries(demo
     Qt5::Widgets
     Qt5::Core
     Qt5::Gui
-)
-
-set(BOOST_LIB_DIR "/home/root/software/boost_1.85.0_install/lib")
-
-target_link_options(demo PRIVATE 
-    "-Wl,-rpath-link,${BOOST_LIB_DIR}"
 )
