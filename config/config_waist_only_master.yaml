@@ -1,0 +1,50 @@
+master:
+  id: 0 # 填写实际的主站ID（必须唯一）
+  cpu_set:  6 #指定ethercat的实时任务绑定到哪个核心
+  frequency: 1000
+  
+
+slaves: #双臂脖子双手整机 (右臂+右手+左臂+左手+脖子)
+ 
+#PowerB
+  - position: 0
+    alias: 0
+    vendor_id: 0x000004d8
+    product_code: 0x00005001
+    name: "ZDL-Robotics PowerB"
+    need_dc: true
+# 轮子
+  - position: 1
+    alias: 0
+    vendor_id: 0x000004d8
+    product_code: 0x00004001
+    name: "Device4001"
+    need_dc: true
+#腰部关节1
+  - position: 2
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+#腰部关节2
+  - position: 3
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+#腰部关节3
+  - position: 4
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+#腰部关节4
+  - position: 5
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true

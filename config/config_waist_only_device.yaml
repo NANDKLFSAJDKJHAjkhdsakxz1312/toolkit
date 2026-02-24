@@ -1,0 +1,71 @@
+joints: #双臂脖子整机(注意，限位是根据关节安装位置来确定的,需要对着实机用滑条确认一下方向)
+
+#腰部关节1
+  - joint_id: 0
+    slave_id: 2
+    brand: 1
+    joint_params:
+      encoder_type: 1 #编码器类型 双编=0，单编=1
+      bits: 16      #编码器位数
+      ratio: 101      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 360   #关节角上限
+      lower_limit_deg: -360   #关节角下限
+      round_flag: true  # 方向标志（true/false）
+#腰部关节2
+  - joint_id: 1
+    slave_id: 3
+    brand: 1
+    joint_params:
+      encoder_type: 1 #编码器类型 双编=0，单编=1
+      bits: 16      #编码器位数
+      ratio: 101      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 360    #关节角上限
+      lower_limit_deg: -360   #关节角下限
+      round_flag: true  # 方向标志（true/false）
+#腰部关节3
+  - joint_id: 2
+    slave_id: 4
+    brand: 1
+    joint_params:
+      encoder_type: 1 #编码器类型 双编=0，单编=1
+      bits: 16      #编码器位数
+      ratio: 101      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 360    #关节角上限
+      lower_limit_deg: -360   #关节角下限
+      round_flag: true  # 方向标志（true/false）
+  #腰部关节4
+  - joint_id: 3
+    slave_id: 5
+    brand: 1
+    joint_params:
+      encoder_type: 1 #编码器类型 双编=0，单编=1
+      bits: 16      #编码器位数
+      ratio: 101      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 360    #关节角上限
+      lower_limit_deg: -360   #关节角下限
+      round_flag: true  # 方向标志（true/false）
+
+t_powerboards: 
+     - powerboard_id: 0       #powerA
+       slave_id: 19       # 填写实际的从站ID
+
+     - powerboard_id: 1       #powerB
+       slave_id: 22       # 填写实际的从站ID
+
+t_doublewheels:
+      - doublewheel_id: 0
+        slave_id: 23
+       
+
+t hands: 
+     - hand_id: 0
+       slave_id: 9       # 填写实际的从站ID
+       
+     - hand_id: 1
+       slave_id: 18       # 填写实际的从站ID
+
+

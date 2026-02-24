@@ -1,0 +1,6 @@
+build*/
+*build/
+.cmake/
+extra_files/
+*.user*
+*.zip

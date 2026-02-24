@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=EtherCAT控制程序
+Comment=启动EtherCAT服务并运行采集程序
+Exec=/home/pi/workspace/ws_ZDL_EC_MoveCapture/build/ethercat_launcher.sh
+Icon=application-x-executable
+Terminal=false
+Type=Application
+Categories=Utility;

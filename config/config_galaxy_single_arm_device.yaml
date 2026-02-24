@@ -1,0 +1,62 @@
+is_self_encoder: false
+spd_log_level: 1 # trace=0, debug=1, info=2, warn=3
+# 左臂
+joints:
+  - joint_id: 0
+    slave_id: 0       # 填写实际的从站ID
+    sub_id: 1         # 在从站下的子ID
+    card_slave_id: 1    # 填写控制卡的从站ID
+    brake_addr: 0x2010
+    torque_addr: 0x2002
+    joint_params:
+
+  - joint_id: 1
+    slave_id: 0
+    sub_id: 2
+    card_slave_id: 1
+    brake_addr: 0x2009
+    torque_addr: 0x2001
+    joint_params:
+
+  - joint_id: 2
+    slave_id: 2
+    sub_id: 1
+    card_slave_id: 3
+    brake_addr: 0x2010
+    torque_addr: 0x2002
+    brand: 0
+    joint_params:
+
+  - joint_id: 3
+    slave_id: 2
+    sub_id: 2
+    card_slave_id: 3
+    brake_addr: 0x2009
+    torque_addr: 0x2001
+    brand: 0
+    joint_params:
+      
+  - joint_id: 4 
+    slave_id: 4
+    sub_id: 2
+    card_slave_id: 5
+    brake_addr: 0x2008
+    torque_addr: 0x2002
+    joint_params:
+
+  - joint_id: 5
+    slave_id: 4
+    sub_id: 1
+    card_slave_id: 5
+    brake_addr: 0x2008
+    torque_addr: 0x2001
+    joint_params:
+
+  - joint_id: 6
+    slave_id: 4
+    sub_id: 0
+    card_slave_id: 5
+    brake_addr: 0x2008
+    torque_addr: 0x2000
+    joint_params:
+

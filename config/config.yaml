@@ -1,0 +1,21 @@
+current_config: 4
+# 0:自动选择, 1:双臂, 2:左臂, 3:右臂
+
+config:
+ - idx: 1
+   config_master_dir: config_galaxy_dual_arm_master.yaml
+   config_device_dir: config_galaxy_dual_arm_device.yaml
+
+ - idx: 2
+   config_master_dir: config_galaxy_left_arm_master.yaml
+   config_device_dir: config_galaxy_single_arm_device.yaml
+
+ - idx: 3
+   config_master_dir: config_galaxy_right_arm_master.yaml
+   config_device_dir: config_galaxy_single_arm_device.yaml
+
+ - idx: 4
+   config_master_dir: config_waist_only_master.yaml
+   config_device_dir: config_waist_only_device.yaml
+   
+
