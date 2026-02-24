@@ -321,10 +321,10 @@ void MainWindow::on_btn_f1_clicked()
     const double T = 4.0;       // 周期 4s
     const double omega = 2.0 * M_PI / T;
     
-    std::array<double, 14> q_cmd;
-    q_cmd.fill(0.0);
+    controller::ControlCommand q_cmd;
+    // q_cmd.fill(0.0);
 
-    for (int i = 0; i < 14; ++i) {
+    for (int i = 0; i < 7; ++i) {
       if (active_config.count(i)) {
         double q_min = active_config.at(i).min_q;
         double q_max = active_config.at(i).max_q;
@@ -336,16 +336,16 @@ void MainWindow::on_btn_f1_clicked()
           // 使用 1 - cos 曲线实现从速度 0 起步，到速度 0 结束
           // 公式：q = (target/2) * (1 - cos(pi * t / t_prep))
           double prep_omega = M_PI / t_prep;
-          q_cmd[i] = (q_min / 2.0) * (1.0 - std::cos(prep_omega * t));
+          q_cmd.left_arm[i] = (q_min / 2.0) * (1.0 - std::cos(prep_omega * t));
         } 
         else {
           // === 阶段 B: 正式的周期运动 ===
           // 修正时间偏移量，确保从 t = t_prep 时刻开始接续
           double t_cycle = t - t_prep; 
-          q_cmd[i] = mid - amp * std::cos(omega * t_cycle);
+          q_cmd.left_arm[i] = mid - amp * std::cos(omega * t_cycle);
         }
       } else {
-        q_cmd[i] = 0.0;
+        q_cmd.left_arm[i] = 0.0;
       }
     }
 

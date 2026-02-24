@@ -12,6 +12,12 @@ struct ControlTypeBase
   bool motion_finished = false;
 };
 
+struct ControlCommand{
+  std::array<double, 7> left_arm{0.0};
+  std::array<double, 7> right_arm{0.0};
+  std::array<double, 4> waist{0.0};
+};
+
 class Torques : public ControlTypeBase
 {
  public:
@@ -30,16 +36,9 @@ class Torques : public ControlTypeBase
 class JointPositions : public ControlTypeBase
 {
  public:
-  JointPositions(const std::array<double, 14>& joint_positions) noexcept: q(joint_positions) {}
+  JointPositions(const ControlCommand& joint_positions) noexcept: q(joint_positions) {}
 
-  JointPositions(std::initializer_list<double> joint_positions){
-  if (joint_positions.size() != q.size()) {
-    throw std::invalid_argument("Invalid number of elements in joint_positions.");
-  }
-  std::copy(joint_positions.begin(), joint_positions.end(), q.begin());
-}
-
-  std::array<double, 14> q{};
+  ControlCommand q{};
 };
 
 inline Torques MotionFinished(Torques command) noexcept
