@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow {
   std::unique_ptr<controller::ControllerInterface> robot_;
   std::unique_ptr<QTimer> status_update_timer_;
 
-  static constexpr int kCsvDataCount = 42;
+  static constexpr int kCsvDataCount = 22;
   std::unique_ptr<toolkit::CsvSaver<kCsvDataCount>> csv_saver_;
   std::unique_ptr<QTimer> csv_saver_timer_;
 

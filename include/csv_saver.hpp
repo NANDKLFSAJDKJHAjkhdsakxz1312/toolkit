@@ -11,6 +11,7 @@
 #include <atomic>
 #include <chrono>
 #include <iostream>
+#include <iomanip>
 #include <charconv> // C++17 核心库
 
 namespace toolkit {
@@ -24,6 +25,7 @@ class CsvSaver {
       if (file_.is_open()) {
           worker_ = std::thread(&CsvSaver::processQueue, this);
       }
+      std::cout << std::fixed << std::setprecision(1);
   }
   
   ~CsvSaver() {
@@ -87,9 +89,12 @@ class CsvSaver {
               
               for (std::size_t i = 0; i < N; ++i) {
                   // 使用 std::to_chars 进行极速转换
-                  auto [ptr, ec] = std::to_chars(line_buffer.data(), 
-                                                line_buffer.data() + line_buffer.size(), 
-                                                row[i]);
+                  auto [ptr, ec] = std::to_chars(line_buffer.data(),
+                                                 line_buffer.data() + line_buffer.size(),
+                                                 row[i]
+                                                //  std::chars_format::fixed, // 核心修改：指定固定格式
+                                                //  6  // 核心修改：指定精度
+                                                 );                     
                   if (ec == std::errc()) {
                       // 写入转换后的字符段
                       file_.write(line_buffer.data(), ptr - line_buffer.data());
@@ -114,7 +119,7 @@ class CsvSaver {
               if (total_rows_written > 0) {
                   double avg_time = static_cast<double>(total_duration_us) / total_rows_written;
                   std::cout << "[CsvSaver Info] Avg write time: " << avg_time 
-                            << " us/row (Total rows this sec: " << total_rows_written << ")" << std::endl;
+                            << " us/row (Total rows this sec: " << total_rows_written << ")" << "\n";
               }
               total_duration_us = 0;
               total_rows_written = 0;

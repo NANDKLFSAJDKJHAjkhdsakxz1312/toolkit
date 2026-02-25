@@ -302,16 +302,16 @@ void MainWindow::on_btn_f1_clicked()
 
   struct MotionRange { double min_q; double max_q; };
   const std::map<int, MotionRange> active_config = {
-    {0, {-0.5, 0.5}}, // 左臂关节1
-    {2, {-0.0, 1.0}}, // 左臂关节3
-    {4, {-0.0, 1.0}}, // 左臂关节5
-    {5, {-0.4, 0.4}}, // 左臂关节6
-    {6, {-0.5, 0.5}}, // 左臂关节7
-    {7, {-0.5, 0.5}}, // 右臂关节1
-    {9, {-0.0, 1.0}}, // 右臂关节3
-    {11, {-0.0, 1.0}}, // 右臂关节5
-    {12, {-0.4, 0.4}}, // 右臂关节6
-    {13, {-0.5, 0.5}}  // 右臂关节7
+    {0, {-0.5, 0.5}} // 左臂关节1
+    // {2, {-0.0, 1.0}}, // 左臂关节3
+    // {4, {-0.0, 1.0}}, // 左臂关节5
+    // {5, {-0.4, 0.4}}, // 左臂关节6
+    // {6, {-0.5, 0.5}} // 左臂关节7
+    // {7, {-0.5, 0.5}}, // 右臂关节1
+    // {9, {-0.0, 1.0}}, // 右臂关节3
+    // {11, {-0.0, 1.0}}, // 右臂关节5
+    // {12, {-0.4, 0.4}}, // 右臂关节6
+    // {13, {-0.5, 0.5}}  // 右臂关节7
   };
 
   auto motion_callback = [active_config](const controller::RobotState& s,
@@ -358,7 +358,7 @@ void MainWindow::on_btn_f1_clicked()
 void MainWindow::initCsvSaver()
 {
   csv_saver_ = std::make_unique<toolkit::CsvSaver<kCsvDataCount>>("/home/root/csp_log.csv");
-  csv_saver_timer_->start(10);
+  csv_saver_timer_->start(100);// 100ms
 }
 
 void MainWindow::writeCsvSaver()
@@ -366,12 +366,10 @@ void MainWindow::writeCsvSaver()
   // printf("writeCsvSaver\n");
   auto state = robot_->getRobotState();
   std::array<double, kCsvDataCount> data;
-  std::copy_n(state.left_arm.q.begin(), 7, data.begin());
-  std::copy_n(state.right_arm.q.begin(), 7, data.begin() + 7);
-  std::copy_n(state.left_arm.dq.begin(), 7, data.begin() + 14);
-  std::copy_n(state.right_arm.dq.begin(), 7, data.begin() + 21);
-  std::copy_n(state.left_arm.tau_J.begin(), 7, data.begin() + 28);
-  std::copy_n(state.right_arm.tau_J.begin(), 7, data.begin() + 35);
+  data[0] = state.time.toSec();
+  std::copy_n(state.left_arm.q.begin(), 7, data.begin()+1);
+  std::copy_n(state.left_arm.dq.begin(), 7, data.begin() + 8);
+  std::copy_n(state.left_arm.tau_J.begin(), 7, data.begin() + 15);
   csv_saver_->writeRow(data);
 }
 
@@ -478,4 +476,5 @@ void MainWindow::on_btn_f7_clicked()
 void MainWindow::on_btn_f8_clicked()
 {
   robot_->stopCurrentMisiion();
+  csv_saver_timer_->stop();
 }
