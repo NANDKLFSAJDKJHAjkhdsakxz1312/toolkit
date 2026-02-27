@@ -1,12 +1,11 @@
 #include "mainwindow.h"
 
-#include <algorithm>
-#include <cmath>
-
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QHeaderView>
 #include <QTableWidget>
+#include <algorithm>
+#include <cmath>
 
 #include "./ui_mainwindow.h"
 
@@ -35,7 +34,6 @@ MainWindow::MainWindow(QWidget* parent)
   initStatusTable();
 
   robot_ = controller::createController();
-
 }
 
 MainWindow::~MainWindow()
@@ -46,12 +44,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::initStatusTable()
 {
-  auto init_status_table = [&](QTableWidget* statusTable,double count) {
+  auto init_status_table = [&](QTableWidget* statusTable, double count, QStringList& headers) {
     if (!statusTable) return;
-
-    // 设置表头标签
-    QStringList headers;
-    headers << "关节位置" << "关节速度" << "电机力矩" << "传感器力矩" << "状态字" << "运行模式";
 
     // 设置表格行列数
     statusTable->setRowCount(count);
@@ -83,9 +77,16 @@ void MainWindow::initStatusTable()
     }
   };
 
-  init_status_table(ui->statusTable_right,7);
-  init_status_table(ui->statusTable_left,7);
-  init_status_table(ui->statusTable_waist,4);
+  // 设置表头标签
+  QStringList headers;
+  headers << "关节位置" << "关节速度" << "电机力矩" << "传感器力矩" << "状态字" << "运行模式";
+
+  QStringList headers2;
+  headers2 << "关节位置" << "期望位置" << "位置偏差" << "关节速度" << "电机力矩" << "状态字";
+
+  init_status_table(ui->statusTable_right, 7, headers);
+  init_status_table(ui->statusTable_left, 7, headers);
+  init_status_table(ui->statusTable_waist, 4, headers2);
 }
 
 void MainWindow::updateStatusTable()
@@ -128,13 +129,16 @@ void MainWindow::updateStatusTable()
   {
     ui->statusTable_waist->item(i, 0)->setText(QString::number(state.folded_waist.q.at(i), 'f', 3));
 
-    ui->statusTable_waist->item(i, 1)->setText(QString::number(state.folded_waist.dq.at(i), 'f', 3));
+    ui->statusTable_waist->item(i, 1)->setText(QString::number(state.folded_waist.q_d.at(i), 'f', 3));
 
-    ui->statusTable_waist->item(i, 2)->setText(QString::number(state.folded_waist.tau_J.at(i), 'f', 3));
+    ui->statusTable_waist->item(i, 2)->setText(QString::number(state.folded_waist.q_e.at(i), 'f', 3));
 
-    ui->statusTable_waist->item(i, 4)->setText(QString("0x%1").arg(state.folded_waist.status_word.at(i), 4, 16, QChar('0')));
+    ui->statusTable_waist->item(i, 3)->setText(QString::number(state.folded_waist.dq.at(i), 'f', 3));
 
-    ui->statusTable_waist->item(i, 5)->setText(QString::number(state.folded_waist.mode_of_operation.at(i)));
+    ui->statusTable_waist->item(i, 4)->setText(QString::number(state.folded_waist.tau_J.at(i), 'f', 3));
+
+    ui->statusTable_waist->item(i, 5)->setText(
+        QString("0x%1").arg(state.folded_waist.status_word.at(i), 4, 16, QChar('0')));
   }
 }
 
@@ -229,9 +233,8 @@ void MainWindow::updateUI()
   }
 
   updateStatusTable();
-  double target =  static_cast<double>(ui->waist_target_slider->value())/ 1000.0;
+  double target = static_cast<double>(ui->waist_target_slider->value()) / 1000.0;
   ui->waist_target_show->setText(QString::number(target, 'f', 3));
-
 }
 
 void MainWindow::on_btn_e_stop_clicked()
@@ -292,7 +295,7 @@ void MainWindow::on_btn_s5_clicked()
 
 void MainWindow::on_btn_send_waist_target_clicked()
 {
-  double target =  static_cast<double>(ui->waist_target_slider->value())/ 1000.0;
+  double target = static_cast<double>(ui->waist_target_slider->value()) / 1000.0;
   robot_->setFoldedWaistTarget(target);
 }
 
@@ -300,51 +303,61 @@ void MainWindow::on_btn_f1_clicked()
 {
   initCsvSaver();
 
-  struct MotionRange { double min_q; double max_q; };
+  struct MotionRange
+  {
+    double min_q;
+    double max_q;
+  };
   const std::map<int, MotionRange> active_config = {
-    {0, {-0.5, 0.5}} // 左臂关节1
-    // {2, {-0.0, 1.0}}, // 左臂关节3
-    // {4, {-0.0, 1.0}}, // 左臂关节5
-    // {5, {-0.4, 0.4}}, // 左臂关节6
-    // {6, {-0.5, 0.5}} // 左臂关节7
-    // {7, {-0.5, 0.5}}, // 右臂关节1
-    // {9, {-0.0, 1.0}}, // 右臂关节3
-    // {11, {-0.0, 1.0}}, // 右臂关节5
-    // {12, {-0.4, 0.4}}, // 右臂关节6
-    // {13, {-0.5, 0.5}}  // 右臂关节7
+      {0, {-0.5, 0.5}}  // 左臂关节1
+      // {2, {-0.0, 1.0}}, // 左臂关节3
+      // {4, {-0.0, 1.0}}, // 左臂关节5
+      // {5, {-0.4, 0.4}}, // 左臂关节6
+      // {6, {-0.5, 0.5}} // 左臂关节7
+      // {7, {-0.5, 0.5}}, // 右臂关节1
+      // {9, {-0.0, 1.0}}, // 右臂关节3
+      // {11, {-0.0, 1.0}}, // 右臂关节5
+      // {12, {-0.4, 0.4}}, // 右臂关节6
+      // {13, {-0.5, 0.5}}  // 右臂关节7
   };
 
   auto motion_callback = [active_config](const controller::RobotState& s,
-                            controller::Duration time) -> controller::JointPositions {
+                                         controller::Duration time) -> controller::JointPositions {
     const double t = time.toSec();
     const double t_prep = 2.0;  // 设定 2 秒时间从 0 运动到 q_min
     const double T = 4.0;       // 周期 4s
     const double omega = 2.0 * M_PI / T;
-    
+
     controller::ControlCommand q_cmd;
     // q_cmd.fill(0.0);
 
-    for (int i = 0; i < 7; ++i) {
-      if (active_config.count(i)) {
+    for (int i = 0; i < 7; ++i)
+    {
+      if (active_config.count(i))
+      {
         double q_min = active_config.at(i).min_q;
         double q_max = active_config.at(i).max_q;
         double amp = (q_max - q_min) / 2.0;
         double mid = (q_max + q_min) / 2.0;
 
-        if (t < t_prep) {
+        if (t < t_prep)
+        {
           // === 阶段 A: 从 0 平滑过渡到 q_min ===
           // 使用 1 - cos 曲线实现从速度 0 起步，到速度 0 结束
           // 公式：q = (target/2) * (1 - cos(pi * t / t_prep))
           double prep_omega = M_PI / t_prep;
           q_cmd.left_arm[i] = (q_min / 2.0) * (1.0 - std::cos(prep_omega * t));
-        } 
-        else {
+        }
+        else
+        {
           // === 阶段 B: 正式的周期运动 ===
           // 修正时间偏移量，确保从 t = t_prep 时刻开始接续
-          double t_cycle = t - t_prep; 
+          double t_cycle = t - t_prep;
           q_cmd.left_arm[i] = mid - amp * std::cos(omega * t_cycle);
         }
-      } else {
+      }
+      else
+      {
         q_cmd.left_arm[i] = 0.0;
       }
     }
@@ -358,7 +371,7 @@ void MainWindow::on_btn_f1_clicked()
 void MainWindow::initCsvSaver()
 {
   csv_saver_ = std::make_unique<toolkit::CsvSaver<kCsvDataCount>>("/home/root/csp_log.csv");
-  csv_saver_timer_->start(100);// 100ms
+  csv_saver_timer_->start(100);  // 100ms
 }
 
 void MainWindow::writeCsvSaver()
@@ -367,7 +380,7 @@ void MainWindow::writeCsvSaver()
   auto state = robot_->getRobotState();
   std::array<double, kCsvDataCount> data;
   data[0] = state.time.toSec();
-  std::copy_n(state.left_arm.q.begin(), 7, data.begin()+1);
+  std::copy_n(state.left_arm.q.begin(), 7, data.begin() + 1);
   std::copy_n(state.left_arm.dq.begin(), 7, data.begin() + 8);
   std::copy_n(state.left_arm.tau_J.begin(), 7, data.begin() + 15);
   csv_saver_->writeRow(data);
@@ -411,8 +424,8 @@ void MainWindow::on_btn_f4_clicked()
     std::array<double, 14> tau_cmd{0.0};
 
     // 2. 正弦运动参数
-    constexpr double A     = 5.0;  // 振幅 5.0 N*m
-    constexpr double T     = 4.0;  // 周期 4.0 s
+    constexpr double A = 5.0;  // 振幅 5.0 N*m
+    constexpr double T = 4.0;  // 周期 4.0 s
     constexpr double omega = 2.0 * M_PI / T;
 
     double q1_target = A * std::sin(omega * t);
@@ -444,13 +457,13 @@ void MainWindow::on_btn_f6_clicked()
 
   // ==================== 刚度参数 (Stiffness, Nm/rad) ====================
   // 近端关节(1-3)设定较高刚度以支撑载荷，末端(5-7)设定较低刚度以保持柔顺
-  p.left_arm_stiffness  = {100.0, 100.0, 80.0, 80.0, 40.0, 20.0, 10.0};
+  p.left_arm_stiffness = {100.0, 100.0, 80.0, 80.0, 40.0, 20.0, 10.0};
   p.right_arm_stiffness = {100.0, 100.0, 80.0, 80.0, 40.0, 20.0, 10.0};
 
   // ==================== 阻尼参数 (Damping, Nm·s/rad) ====================
   // 根据 damping = 2 * 0.7 * sqrt(K * I) 估算。
   // 假设近端惯量较大，阻尼相应调高；末端惯量小，阻尼调低以防关节发硬。
-  p.left_arm_damping  = {30.0, 30.0, 20.0, 20.0, 10.0, 5.0, 2.0};
+  p.left_arm_damping = {30.0, 30.0, 20.0, 20.0, 10.0, 5.0, 2.0};
   p.right_arm_damping = {30.0, 30.0, 20.0, 20.0, 10.0, 5.0, 2.0};
 
   robot_->runJointImpedance(p);
@@ -462,12 +475,12 @@ void MainWindow::on_btn_f7_clicked()
 
   // 稍微降低刚度，提高旋转项的相对阻尼
   // v_x, v_y, v_z, w_x, w_y, w_z
-  p.left_arm_stiffness  = {150.0, 150.0, 150.0, 10.0, 10.0, 10.0};
+  p.left_arm_stiffness = {150.0, 150.0, 150.0, 10.0, 10.0, 10.0};
   p.right_arm_stiffness = {150.0, 150.0, 150.0, 10.0, 10.0, 10.0};
 
   // 阻尼调整：遵循 D = 2 * zeta * sqrt(K)，这里假设有效质量为常数进行估算
   // 旋转项 (40->10) 显著降低，因为旋转震荡往往是抖动源
-  p.left_arm_damping  = {25.0, 25.0, 25.0, 2.0, 2.0, 2.0};
+  p.left_arm_damping = {25.0, 25.0, 25.0, 2.0, 2.0, 2.0};
   p.right_arm_damping = {25.0, 25.0, 25.0, 2.0, 2.0, 2.0};
 
   robot_->runCartesianImpedance(p);
