@@ -154,11 +154,13 @@ struct RobotState
 
     std::array<double, 4> q{};  // 关节位置（反馈值）
 
-    std::array<double, 7> q_d{};  // 关节位置（期望值）
+    std::array<double, 4> q_d{};  // 关节位置（期望值）
+
+    std::array<double, 4> q_e{};
 
     std::array<double, 4> dq{};  // 关节速度（反馈值）
 
-    std::array<double, 7> tau_J{};  // 关节力矩（电机反馈值）
+    std::array<double, 4> tau_J{};  // 关节力矩（电机反馈值）
 
   }folded_waist;
 

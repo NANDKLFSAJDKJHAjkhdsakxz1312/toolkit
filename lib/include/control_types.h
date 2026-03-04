@@ -16,6 +16,7 @@ struct ControlCommand{
   std::array<double, 7> left_arm{0.0};
   std::array<double, 7> right_arm{0.0};
   std::array<double, 4> waist{0.0};
+  std::array<double, 4> waist_tau_offset{0.0};
 };
 
 class Torques : public ControlTypeBase
