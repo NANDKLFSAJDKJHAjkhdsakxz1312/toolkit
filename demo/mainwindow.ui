@@ -17,9 +17,9 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>130</y>
-      <width>391</width>
+      <x>280</x>
+      <y>120</y>
+      <width>531</width>
       <height>321</height>
      </rect>
     </property>
@@ -47,8 +47,8 @@
      <widget class="QGroupBox" name="groupBox_3">
       <property name="geometry">
        <rect>
-        <x>200</x>
-        <y>10</y>
+        <x>130</x>
+        <y>0</y>
         <width>171</width>
         <height>131</height>
        </rect>
@@ -224,9 +224,9 @@
      <widget class="QPushButton" name="btn_f1">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>40</y>
-        <width>151</width>
+        <x>10</x>
+        <y>10</y>
+        <width>111</width>
         <height>41</height>
        </rect>
       </property>
@@ -242,9 +242,9 @@
      <widget class="QPushButton" name="btn_f2">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>90</y>
-        <width>151</width>
+        <x>10</x>
+        <y>60</y>
+        <width>111</width>
         <height>41</height>
        </rect>
       </property>
@@ -265,8 +265,8 @@
        <rect>
         <x>10</x>
         <y>140</y>
-        <width>271</width>
-        <height>131</height>
+        <width>191</width>
+        <height>111</height>
        </rect>
       </property>
       <property name="title">
@@ -275,10 +275,10 @@
       <widget class="QSlider" name="waist_target_slider">
        <property name="geometry">
         <rect>
-         <x>100</x>
-         <y>40</y>
-         <width>160</width>
-         <height>16</height>
+         <x>9</x>
+         <y>30</y>
+         <width>171</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="minimum">
@@ -294,10 +294,10 @@
       <widget class="QLabel" name="waist_target_show">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>81</width>
-         <height>31</height>
+         <x>20</x>
+         <y>60</y>
+         <width>71</width>
+         <height>41</height>
         </rect>
        </property>
        <property name="font">
@@ -321,8 +321,8 @@
       <widget class="QPushButton" name="btn_send_waist_target">
        <property name="geometry">
         <rect>
-         <x>180</x>
-         <y>70</y>
+         <x>100</x>
+         <y>60</y>
          <width>71</width>
          <height>41</height>
         </rect>
@@ -334,6 +334,179 @@
        </property>
        <property name="text">
         <string>下发</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_7">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>130</y>
+        <width>271</width>
+        <height>131</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>轮子控制</string>
+      </property>
+      <widget class="QPushButton" name="btn_send_wheel_target">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>90</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>下发</string>
+       </property>
+      </widget>
+      <widget class="QSlider" name="left_wheel_target_slider">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>30</y>
+         <width>131</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimum">
+        <number>-300</number>
+       </property>
+       <property name="maximum">
+        <number>300</number>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="left_wheel_target_show">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>30</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans</family>
+         <pointsize>11</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>49</width>
+         <height>14</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>左轮</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>60</y>
+         <width>49</width>
+         <height>14</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>右轮</string>
+       </property>
+      </widget>
+      <widget class="QSlider" name="right_wheel_target_slider">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>60</y>
+         <width>131</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="minimum">
+        <number>-300</number>
+       </property>
+       <property name="maximum">
+        <number>300</number>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="right_wheel_target_show">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>60</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans</family>
+         <pointsize>11</pointsize>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btn_stop_wheel">
+       <property name="geometry">
+        <rect>
+         <x>100</x>
+         <y>90</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>停止</string>
        </property>
       </widget>
      </widget>
@@ -583,7 +756,7 @@
      <rect>
       <x>20</x>
       <y>120</y>
-      <width>391</width>
+      <width>251</width>
       <height>331</height>
      </rect>
     </property>
@@ -605,7 +778,7 @@
      <property name="geometry">
       <rect>
        <x>130</x>
-       <y>90</y>
+       <y>120</y>
        <width>111</width>
        <height>41</height>
       </rect>
@@ -619,14 +792,14 @@
       </font>
      </property>
      <property name="text">
-      <string>S2:停止程序</string>
+      <string>S2:断开控制器</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox_5">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>160</y>
        <width>231</width>
        <height>61</height>
       </rect>
@@ -701,7 +874,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>220</y>
+       <y>230</y>
        <width>111</width>
        <height>41</height>
       </rect>
@@ -722,7 +895,7 @@
      <property name="geometry">
       <rect>
        <x>130</x>
-       <y>220</y>
+       <y>230</y>
        <width>111</width>
        <height>41</height>
       </rect>
@@ -743,7 +916,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>90</y>
+       <y>120</y>
        <width>111</width>
        <height>41</height>
       </rect>
@@ -757,7 +930,7 @@
       </font>
      </property>
      <property name="text">
-      <string>S1:启动程序</string>
+      <string>S1:连接控制器</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox_10">
@@ -765,8 +938,8 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>371</width>
-       <height>61</height>
+       <width>231</width>
+       <height>91</height>
       </rect>
      </property>
      <property name="font">
@@ -861,8 +1034,8 @@
      <widget class="QRadioButton" name="btn_waist_only">
       <property name="geometry">
        <rect>
-        <x>240</x>
-        <y>30</y>
+        <x>10</x>
+        <y>60</y>
         <width>91</width>
         <height>23</height>
        </rect>
@@ -886,9 +1059,9 @@
     <widget class="QPushButton" name="btn_f8">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>220</y>
-       <width>101</width>
+       <x>130</x>
+       <y>280</y>
+       <width>111</width>
        <height>41</height>
       </rect>
      </property>

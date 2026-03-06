@@ -24,6 +24,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->icon->setPixmap(pix);
   }
 
+  // QStringList items;
+  // items << "左轮" << "右轮";
+  // ui->comboBox->addItems(items);
+
   connect(status_update_timer_.get(), &QTimer::timeout, this, &MainWindow::updateUI);
   status_update_timer_->start(200);  // 每200ms更新一次（5Hz）
 
@@ -235,6 +239,11 @@ void MainWindow::updateUI()
   updateStatusTable();
   double target = static_cast<double>(ui->waist_target_slider->value()) / 1000.0;
   ui->waist_target_show->setText(QString::number(target, 'f', 3));
+
+  const double left_wheel_target = static_cast<double>(ui->left_wheel_target_slider->value()) / 100.0;
+  const double right_wheel_target = static_cast<double>(ui->right_wheel_target_slider->value()) / 100.0;
+  ui->left_wheel_target_show->setText(QString::number(left_wheel_target, 'f', 3));
+  ui->right_wheel_target_show->setText(QString::number(right_wheel_target, 'f', 3));
 }
 
 void MainWindow::on_btn_e_stop_clicked()
@@ -490,4 +499,18 @@ void MainWindow::on_btn_f8_clicked()
 {
   robot_->stopCurrentMisiion();
   csv_saver_timer_->stop();
+}
+
+void MainWindow::on_btn_send_wheel_target_clicked()
+{
+  const auto left_vel = static_cast<double>(ui->left_wheel_target_slider->value()) / 100.0;
+  const auto right_vel = static_cast<double>(ui->right_wheel_target_slider->value()) / 100.0;
+  robot_->setWheelTarget(left_vel, right_vel);
+}
+
+void MainWindow::on_btn_stop_wheel_clicked() {
+
+  robot_->setWheelTarget(0.0,0.0);
+  ui->left_wheel_target_slider->setValue(0);
+  ui->right_wheel_target_slider->setValue(0);
 }

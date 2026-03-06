@@ -60,6 +60,8 @@ class MainWindow : public QMainWindow {
   void on_btn_s5_clicked();
 
   void on_btn_send_waist_target_clicked();
+  void on_btn_send_wheel_target_clicked();
+  void on_btn_stop_wheel_clicked();
 
 };
 #endif  // MAINWINDOW_H
