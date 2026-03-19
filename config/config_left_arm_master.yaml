@@ -1,0 +1,54 @@
+master:
+  id: 0 # 填写实际的主站ID（必须唯一）
+  cpu_set: 6 #指定ethercat的实时任务绑定到哪个核心
+  frequency: 1000
+
+slaves:
+  - position: 0
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00009001
+    name: "ZDL-Robotics Driver"
+    need_dc: true
+
+  - position: 1
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00009002
+    name: "ZDL-Robotics HUB"
+    need_dc: true
+
+  - position: 2
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00009001
+    name: "ZDL-Robotics Driver"
+    need_dc: true
+
+  - position: 3
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00009002
+    name: "ZDL-Robotics HUB"
+    need_dc: true
+
+  - position: 4
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00009001
+    name: "ZDL-Robotics Driver"
+    need_dc: true
+
+  - position: 5
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00009002
+    name: "ZDL-Robotics HUB"
+    need_dc: true
+
+  - position: 6
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00500202
+    name: "ZDL-Robotics Hand"
+    need_dc: true

@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "control_types.h"
-#include <robot_state.h> 
+#include "robot_state.h"
 
 // 只兼容 Linux/GCC/Clang
 #define CONTROLLER_API __attribute__((visibility("default")))
@@ -109,6 +109,10 @@ class CONTROLLER_API ControllerInterface {
 
 
   virtual void setFoldedWaistTarget(double pos) = 0;
+
+  virtual void setWheelTarget(double left_vel, double right_vel) = 0;
+
+  virtual void setHandTarget(HandSelect hand, HandCommand cmd) = 0;
 
   /************************************设置函数*********************************/
 

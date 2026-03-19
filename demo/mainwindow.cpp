@@ -6,16 +6,18 @@
 #include <QTableWidget>
 #include <algorithm>
 #include <cmath>
+#include <thread>
 
 #include "./ui_mainwindow.h"
+#include "motion_data_loader.h"
 
 // mainwindow.cpp
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), status_update_timer_(std::make_unique<QTimer>(this))
 {
   ui->setupUi(this);
 
-  // 设置QLabel属性
+  // 设置 QLabel 属性
   ui->icon->setMinimumSize(150, 50);
   ui->icon->setScaledContents(true);
   QPixmap pix(":/images/icon.png");
@@ -28,15 +30,28 @@ MainWindow::MainWindow(QWidget* parent)
   // items << "左轮" << "右轮";
   // ui->comboBox->addItems(items);
 
+  QStringList hand_items1;
+  hand_items1 << "左手" << "右手";
+  ui->comboBox_hand_target1->addItems(hand_items1);
+
+  QStringList hand_items2;
+  hand_items2 << "关节1" << "关节2" << "关节3" << "关节4" << "关节5" << "关节6" << "关节7";
+  ui->comboBox_hand_target2->addItems(hand_items2);
+
   connect(status_update_timer_.get(), &QTimer::timeout, this, &MainWindow::updateUI);
-  status_update_timer_->start(200);  // 每200ms更新一次（5Hz）
+  status_update_timer_->start(200); // 每 200ms 更新一次（5Hz）
 
   csv_saver_timer_ = std::make_unique<QTimer>(this);
   csv_saver_timer_->setTimerType(Qt::PreciseTimer);
   connect(csv_saver_timer_.get(), &QTimer::timeout, this, &MainWindow::writeCsvSaver);
 
-  initStatusTable();
+  ui->spinBox_hand_dq->setValue(100);
+  ui->spinBox_hand_tau->setValue(100);
 
+  initStatusTable();
+  // 在构造函数或启动前预留空间
+  motion_positions_.resize(toolkit::BODY_JOINTS_NUM);
+  motion_velocities_.resize(toolkit::BODY_JOINTS_NUM);
   robot_ = controller::createController();
 }
 
@@ -48,8 +63,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::initStatusTable()
 {
-  auto init_status_table = [&](QTableWidget* statusTable, double count, QStringList& headers) {
-    if (!statusTable) return;
+  auto init_status_table = [&](QTableWidget *statusTable, double count,QStringList& headers)
+  {
+    if (!statusTable)
+      return;
 
     // 设置表格行列数
     statusTable->setRowCount(count);
@@ -62,10 +79,10 @@ void MainWindow::initStatusTable()
 
     statusTable->setStyleSheet("QTableWidget { font-size: 9pt; }");
 
-    // 初始化行标题（关节ID）
+    // 初始化行标题（关节 ID）
     for (int i = 0; i < count; ++i)
     {
-      QTableWidgetItem* item = new QTableWidgetItem(QString::number(i));
+      QTableWidgetItem *item = new QTableWidgetItem(QString::number(i));
       statusTable->setVerticalHeaderItem(i, item);
     }
 
@@ -74,7 +91,7 @@ void MainWindow::initStatusTable()
     {
       for (int col = 0; col < headers.size(); ++col)
       {
-        QTableWidgetItem* item = new QTableWidgetItem("");
+        QTableWidgetItem *item = new QTableWidgetItem("");
         statusTable->setItem(row, col, item);
         item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
       }
@@ -83,7 +100,7 @@ void MainWindow::initStatusTable()
 
   // 设置表头标签
   QStringList headers;
-  headers << "关节位置" << "关节速度" << "电机力矩" << "传感器力矩" << "状态字" << "运行模式";
+  headers << "关节位置" << "关节速度" << "电机力矩" << "传感器力矩" << "状态字" << "错误字";
 
   QStringList headers2;
   headers2 << "关节位置" << "期望位置" << "位置偏差" << "关节速度" << "电机力矩" << "状态字";
@@ -97,9 +114,14 @@ void MainWindow::updateStatusTable()
 {
   auto state = robot_->getRobotState();
 
-  enum class ArmSelect { kLeft, kRight };
+  enum class ArmSelect
+  {
+    kLeft,
+    kRight
+  };
 
-  auto update_status_table = [&](QTableWidget* statusTable, ArmSelect arm) {
+  auto update_status_table = [&](QTableWidget *statusTable, ArmSelect arm)
+  {
     controller::RobotState::ArmState current_arm;
     if (arm == ArmSelect::kLeft)
     {
@@ -122,7 +144,9 @@ void MainWindow::updateStatusTable()
 
       statusTable->item(i, 4)->setText(QString("0x%1").arg(current_arm.status_word.at(i), 4, 16, QChar('0')));
 
-      statusTable->item(i, 5)->setText(QString::number(current_arm.mode_of_operation.at(i)));
+      statusTable->item(i, 5)->setText(QString("0x%1").arg(current_arm.error_code.at(i), 4, 16, QChar('0')));
+
+      // statusTable->item(i, 5)->setText(QString::number(current_arm.mode_of_operation.at(i)));
     }
   };
 
@@ -151,89 +175,89 @@ void MainWindow::updateUI()
   auto state = robot_->getRobotState();
   switch (state.current_mode)
   {
-    case controller::CurrentMode::kNotStart:
-      ui->current_mode->setText("任务未启动");
-      break;
+  case controller::CurrentMode::kNotStart:
+    ui->current_mode->setText("任务未启动");
+    break;
 
-    case controller::CurrentMode::kNotEnable:
-      ui->current_mode->setText("未使能");
-      break;
+  case controller::CurrentMode::kNotEnable:
+    ui->current_mode->setText("未使能");
+    break;
 
-    case controller::CurrentMode::kCSP:
-      ui->current_mode->setText("CSP使能");
-      break;
+  case controller::CurrentMode::kCSP:
+    ui->current_mode->setText("CSP 使能");
+    break;
 
-    case controller::CurrentMode::kCST:
-      ui->current_mode->setText("CST使能");
-      break;
+  case controller::CurrentMode::kCST:
+    ui->current_mode->setText("CST 使能");
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   switch (state.current_mission)
   {
-    case controller::CurrentMission::kUnavailable:
-      ui->current_mission->setText("不可用");
-      break;
+  case controller::CurrentMission::kUnavailable:
+    ui->current_mission->setText("不可用");
+    break;
 
-    case controller::CurrentMission::kHoming:
-      ui->current_mission->setText("标零中");
-      break;
+  case controller::CurrentMission::kHoming:
+    ui->current_mission->setText("标零中");
+    break;
 
-    case controller::CurrentMission::kIdle:
-      ui->current_mission->setText("空闲");
-      break;
+  case controller::CurrentMission::kIdle:
+    ui->current_mission->setText("空闲");
+    break;
 
-    case controller::CurrentMission::kJog:
-      ui->current_mission->setText("点动");
-      break;
+  case controller::CurrentMission::kJog:
+    ui->current_mission->setText("点动");
+    break;
 
-    case controller::CurrentMission::kJointImpedance:
-      ui->current_mission->setText("关节阻抗");
-      break;
+  case controller::CurrentMission::kJointImpedance:
+    ui->current_mission->setText("关节阻抗");
+    break;
 
-    case controller::CurrentMission::kCartImpedance:
-      ui->current_mission->setText("笛卡尔阻抗");
-      break;
+  case controller::CurrentMission::kCartImpedance:
+    ui->current_mission->setText("笛卡尔阻抗");
+    break;
 
-    case controller::CurrentMission::kDrag:
-      ui->current_mission->setText("零力拖动");
-      break;
+  case controller::CurrentMission::kDrag:
+    ui->current_mission->setText("零力拖动");
+    break;
 
-    case controller::CurrentMission::kReturnToZero:
-      ui->current_mission->setText("回零中");
-      break;
+  case controller::CurrentMission::kReturnToZero:
+    ui->current_mission->setText("回零中");
+    break;
 
-    case controller::CurrentMission::kUserCSP:
-      ui->current_mission->setText("kUserCSP");
-      break;
+  case controller::CurrentMission::kUserCSP:
+    ui->current_mission->setText("kUserCSP");
+    break;
 
-    case controller::CurrentMission::kUserCST:
-      ui->current_mission->setText("kUserCST");
-      break;
+  case controller::CurrentMission::kUserCST:
+    ui->current_mission->setText("kUserCST");
+    break;
 
-    case controller::CurrentMission::kFoldedWaistControl:
-      ui->current_mission->setText("FWC");
-      break;
+  case controller::CurrentMission::kFoldedWaistControl:
+    ui->current_mission->setText("FWC");
+    break;
 
-    default:
-      ui->current_mission->setText("???");
-      break;
+  default:
+    ui->current_mission->setText("???");
+    break;
   }
 
   switch (state.current_errors)
   {
-    case controller::RobotError::OK:
-      ui->current_error->setText("");
-      break;
+  case controller::RobotError::OK:
+    ui->current_error->setText("");
+    break;
 
-    case controller::RobotError::kEmergencyStop:
-      ui->current_error->setText("急停触发");
-      break;
+  case controller::RobotError::kEmergencyStop:
+    ui->current_error->setText("急停触发");
+    break;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   updateStatusTable();
@@ -244,6 +268,8 @@ void MainWindow::updateUI()
   const double right_wheel_target = static_cast<double>(ui->right_wheel_target_slider->value()) / 100.0;
   ui->left_wheel_target_show->setText(QString::number(left_wheel_target, 'f', 3));
   ui->right_wheel_target_show->setText(QString::number(right_wheel_target, 'f', 3));
+
+  ui->hand_target_show->setText(QString::number(ui->hand_target_slider->value()));
 }
 
 void MainWindow::on_btn_e_stop_clicked()
@@ -310,65 +336,73 @@ void MainWindow::on_btn_send_waist_target_clicked()
 
 void MainWindow::on_btn_f1_clicked()
 {
-  initCsvSaver();
+  // // 先检查是否是 CSP 模式
+  // if (!robot_->enable(controller::RequestMode::kCSP))
+  // {
+  //   spdlog::error("使能失败，请检查机器人状态");
+  //   return;
+  // }
 
-  struct MotionRange
+  // initCsvSaver();
+
+  // 指定运动数据文件路径
+  motion_file_path_ =
+      "../file/"
+      "left_right_hand_wave20251124.txt"; // 修改为实际文件路径
+
+  // 创建并启动 MotionDataLoader
+  motion_loader_ = std::make_unique<toolkit::MotionDataLoader>();
+
+  // 设置回调函数，用于从 motion_loader 获取数据
+  motion_loader_->setMotionCallback([this](double timestamp) -> std::vector<double>
+                                    {
+    std::vector<double> positions;
+    std::vector<double> velocities;
+    double ts;
+    if (motion_loader_->getLatestJointPositions(positions, velocities, ts))
+    {
+      return positions;
+    }
+    return std::vector<double>(toolkit::BODY_JOINTS_NUM, 0.0); });
+
+  // 启动离线模式（从文件加载）
+  motion_loader_->startOffline(motion_file_path_);
+
+  // 等待数据准备好
+  while (!motion_loader_->isDataReady() && motion_loader_->isRunning())
   {
-    double min_q;
-    double max_q;
-  };
-  const std::map<int, MotionRange> active_config = {
-      {0, {-0.5, 0.5}}  // 左臂关节1
-      // {2, {-0.0, 1.0}}, // 左臂关节3
-      // {4, {-0.0, 1.0}}, // 左臂关节5
-      // {5, {-0.4, 0.4}}, // 左臂关节6
-      // {6, {-0.5, 0.5}} // 左臂关节7
-      // {7, {-0.5, 0.5}}, // 右臂关节1
-      // {9, {-0.0, 1.0}}, // 右臂关节3
-      // {11, {-0.0, 1.0}}, // 右臂关节5
-      // {12, {-0.4, 0.4}}, // 右臂关节6
-      // {13, {-0.5, 0.5}}  // 右臂关节7
-  };
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
 
-  auto motion_callback = [active_config](const controller::RobotState& s,
-                                         controller::Duration time) -> controller::JointPositions {
-    const double t = time.toSec();
-    const double t_prep = 2.0;  // 设定 2 秒时间从 0 运动到 q_min
-    const double T = 4.0;       // 周期 4s
-    const double omega = 2.0 * M_PI / T;
-
+  auto motion_callback = [this](const controller::RobotState &s,
+                                controller::Duration time) -> controller::JointPositions
+  {
     controller::ControlCommand q_cmd;
-    // q_cmd.fill(0.0);
+    static int count = 0;
+    // 从 motion_loader 获取计算出的数据
+    // std::vector<double> motion_positions;
+    // std::vector<double> motion_velocities;
+    double motion_timestamp;
+    if (motion_loader_ && motion_loader_->isDataReady())
+    {
+      motion_loader_->getLatestJointPositions(motion_positions_, motion_velocities_, motion_timestamp);
+    }
 
     for (int i = 0; i < 7; ++i)
     {
-      if (active_config.count(i))
-      {
-        double q_min = active_config.at(i).min_q;
-        double q_max = active_config.at(i).max_q;
-        double amp = (q_max - q_min) / 2.0;
-        double mid = (q_max + q_min) / 2.0;
+      q_cmd.right_arm[i] = toolkit::kJointDirectionFlag[i] ? motion_positions_[i] * 2 * M_PI / 360.0
+                                                           : -motion_positions_[i] * 2 * M_PI / 360.0;
+      q_cmd.left_arm[i] = toolkit::kJointDirectionFlag[i + 7] ? motion_positions_[i + 7] * 2 * M_PI / 360.0
+                                                              : -motion_positions_[i + 7] * 2 * M_PI / 360.0;
+      // auto arc1 = toolkit::kJointDirectionFlag[i] ? motion_positions[i] * 2 * M_PI / 360.0
+      //                                             : -motion_positions[i] * 2 * M_PI / 360.0;
 
-        if (t < t_prep)
-        {
-          // === 阶段 A: 从 0 平滑过渡到 q_min ===
-          // 使用 1 - cos 曲线实现从速度 0 起步，到速度 0 结束
-          // 公式：q = (target/2) * (1 - cos(pi * t / t_prep))
-          double prep_omega = M_PI / t_prep;
-          q_cmd.left_arm[i] = (q_min / 2.0) * (1.0 - std::cos(prep_omega * t));
-        }
-        else
-        {
-          // === 阶段 B: 正式的周期运动 ===
-          // 修正时间偏移量，确保从 t = t_prep 时刻开始接续
-          double t_cycle = t - t_prep;
-          q_cmd.left_arm[i] = mid - amp * std::cos(omega * t_cycle);
-        }
-      }
-      else
-      {
-        q_cmd.left_arm[i] = 0.0;
-      }
+      // count++;
+      // if (count % 1000 == 0)
+      // {
+      //   spdlog::info("当前左臂关节0的弧度值:{},弧度值{}", q_cmd.left_arm[i]);
+        
+      // }
     }
 
     return controller::JointPositions(q_cmd);
@@ -380,18 +414,54 @@ void MainWindow::on_btn_f1_clicked()
 void MainWindow::initCsvSaver()
 {
   csv_saver_ = std::make_unique<toolkit::CsvSaver<kCsvDataCount>>("/home/root/csp_log.csv");
-  csv_saver_timer_->start(100);  // 100ms
+
+  // 添加表头
+  std::array<std::string, kCsvDataCount> headers;
+  headers[0] = "time";
+  for (int i = 0; i < 7; ++i)
+  {
+    headers[1 + i] = "q_d" + std::to_string(i);       // 左臂关节目标位置
+    headers[8 + i] = "q" + std::to_string(i);         // 左臂关节实际位置
+    headers[15 + i] = "dq_d" + std::to_string(i);     // 左臂关节目标速度
+    headers[22 + i] = "dq" + std::to_string(i);       // 左臂关节实际速度
+    headers[29 + i] = "t_motor" + std::to_string(i);  // 左臂关节电机反馈力矩
+    headers[36 + i] = "t_sensor" + std::to_string(i); // 左臂关节传感器反馈力矩
+  }
+  csv_saver_->writeHeaders(headers); // 写入表头
+
+  // csv_saver_timer_->start(100);// 100ms
 }
 
 void MainWindow::writeCsvSaver()
 {
-  // printf("writeCsvSaver\n");
   auto state = robot_->getRobotState();
   std::array<double, kCsvDataCount> data;
   data[0] = state.time.toSec();
-  std::copy_n(state.left_arm.q.begin(), 7, data.begin() + 1);
-  std::copy_n(state.left_arm.dq.begin(), 7, data.begin() + 8);
-  std::copy_n(state.left_arm.tau_J.begin(), 7, data.begin() + 15);
+
+  // 原始数据
+  //  std::copy_n(state.left_arm.q_d.begin(), 7, data.begin()+1);
+  //  std::copy_n(state.left_arm.q.begin(), 7, data.begin()+8);
+  //  std::copy_n(state.left_arm.dq_d.begin(), 7, data.begin() + 15);
+  //  std::copy_n(state.left_arm.dq.begin(), 7, data.begin() + 22);
+  //  std::copy_n(state.left_arm.tau_J.begin(), 7, data.begin() + 29);
+  //  std::copy_n(state.left_arm.tau_Js.begin(), 7, data.begin() + 36);
+
+  // 保留3位小数
+  auto round_to_3_decimals = [](double value)
+  {
+    return std::round(value * 1000.0) / 1000.0;
+  };
+  // 对每个关节的数据进行处理并保留三位小数
+  for (int i = 0; i < 7; ++i)
+  {
+    data[1 + i] = round_to_3_decimals(state.left_arm.q_d[i]);     // 左臂关节目标位置
+    data[8 + i] = round_to_3_decimals(state.left_arm.q[i]);       // 左臂关节实际位置
+    data[15 + i] = round_to_3_decimals(state.left_arm.dq_d[i]);   // 左臂关节目标速度
+    data[22 + i] = round_to_3_decimals(state.left_arm.dq[i]);     // 左臂关节实际速度
+    data[29 + i] = round_to_3_decimals(state.left_arm.tau_J[i]);  // 左臂关节电机反馈力矩
+    data[36 + i] = round_to_3_decimals(state.left_arm.tau_Js[i]); // 左臂关节传感器反馈力矩
+  }
+
   csv_saver_->writeRow(data);
 }
 
@@ -426,9 +496,9 @@ void MainWindow::on_btn_reverse_released()
 
 void MainWindow::on_btn_f4_clicked()
 {
-  auto torque_callback = [](const controller::RobotState& s,
-                            controller::Duration time) -> controller::Torques {
-    // 1. 获取当前总时间（秒）
+  auto torque_callback = [](const controller::RobotState &s,
+                            controller::Duration time) -> controller::Torques
+  {
     const double t = time.toSec();
     std::array<double, 14> tau_cmd{0.0};
 
@@ -441,17 +511,14 @@ void MainWindow::on_btn_f4_clicked()
 
     tau_cmd[0] = q1_target;
 
-    // 调试打印：每隔约 500ms 打印一次
     if (time.toMSec() % 500 == 0)
     {
       printf("Time: %.2f s, Target Q1: %.3f\n", t, q1_target);
     }
 
-    // 5. 使用你定义的 std::array 构造函数返回
     return controller::Torques(tau_cmd);
   };
 
-  // 开启运动
   robot_->runCycleTorque(torque_callback);
 }
 
@@ -499,10 +566,113 @@ void MainWindow::on_btn_f8_clicked()
 {
   robot_->stopCurrentMisiion();
   csv_saver_timer_->stop();
+
+  // 停止 motion_loader
+  if (motion_loader_)
+  {
+    motion_loader_->stop();
+    motion_loader_.reset();
+  }
 }
+
+void MainWindow::on_btn_f9_clicked() 
+{
+  // // 先检查是否是 CSP 模式
+  // if (!robot_->enable(controller::RequestMode::kCSP))
+  // {
+  //   spdlog::error("使能失败，请检查机器人状态");
+  //   return;
+  // }
+
+  // initCsvSaver();
+
+  // 指定运动数据文件路径
+  motion_file_path_ =
+      "../data/"
+      "left_right_hand_wave20251124.txt";  // 修改为实际文件路径
+
+  // 创建并启动 MotionDataLoader
+  motion_loader_ = std::make_unique<toolkit::MotionDataLoader>();
+
+  // 设置回调函数，用于从 motion_loader 获取数据
+  motion_loader_->setMotionCallback([this](double timestamp) -> std::vector<double> {
+    std::vector<double> positions;
+    std::vector<double> velocities;
+    double ts;
+    if (motion_loader_->getLatestJointPositions(positions, velocities, ts))
+    {
+      return positions;
+    }
+    return std::vector<double>(toolkit::BODY_JOINTS_NUM, 0.0);
+  });
+
+  // 启动离线模式（从文件加载）
+  motion_loader_->startOffline(motion_file_path_);
+
+  // 等待数据准备好
+  while (!motion_loader_->isDataReady() && motion_loader_->isRunning())
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+
+  auto motion_callback = [this](const controller::RobotState& s,
+                                controller::Duration time) -> controller::JointPositions {
+    controller::ControlCommand q_cmd;
+    static int count = 0;
+    // 从 motion_loader 获取计算出的数据
+    std::vector<double> motion_positions;
+    std::vector<double> motion_velocities;
+    double motion_timestamp;
+    if (motion_loader_ && motion_loader_->isDataReady())
+    {
+      motion_loader_->getLatestJointPositions(motion_positions, motion_velocities, motion_timestamp);
+    }
+
+    for (int i = 0; i < 7; ++i)
+    {
+      q_cmd.right_arm[i] = toolkit::kJointDirectionFlag[i] ? motion_positions[i] * 2 * M_PI / 360.0
+                                                           : -motion_positions[i] * 2 * M_PI / 360.0;
+      q_cmd.left_arm[i] = toolkit::kJointDirectionFlag[i+7] ? motion_positions[i+7] * 2 * M_PI / 360.0
+                                                          : -motion_positions[i+7] * 2 * M_PI / 360.0;
+    }
+
+    // count++;
+    // if (count == 1000)
+    // {
+    //   spdlog::info("当前关节0的角度值:{},弧度值{}",
+    //                motion_positions[0],
+    //                motion_positions[0] * 2 * M_PI / 360.0);
+    //   count = 0;
+    // }
+
+    return controller::JointPositions(q_cmd);
+  };
+
+  robot_->runCycleJointMotion(motion_callback);
+}
+
+void MainWindow::on_speedFactorSlider_valueChanged(int value)
+{
+  // 将滑条值转换为速度因子 (滑条范围 2-50 对应速度因子 0.2-5.0)
+  double speedFactor = static_cast<double>(value) * 0.1;
+
+  // 设置到 motion_loader
+  if (motion_loader_)
+  {
+    motion_loader_->setSpeedFactor(speedFactor);
+  }
+
+  // 更新界面显示
+  ui->speedFactorValue->setText(QString("%1x").arg(speedFactor, 0, 'f', 1));
+
+  spdlog::info("速度因子已设置为：{}", speedFactor);
+}
+
+
 
 void MainWindow::on_btn_send_wheel_target_clicked()
 {
+  printf("on_btn_send_wheel_target_clicked\n");
   const auto left_vel = static_cast<double>(ui->left_wheel_target_slider->value()) / 100.0;
   const auto right_vel = static_cast<double>(ui->right_wheel_target_slider->value()) / 100.0;
   robot_->setWheelTarget(left_vel, right_vel);
@@ -513,4 +683,32 @@ void MainWindow::on_btn_stop_wheel_clicked() {
   robot_->setWheelTarget(0.0,0.0);
   ui->left_wheel_target_slider->setValue(0);
   ui->right_wheel_target_slider->setValue(0);
+}
+
+void MainWindow::on_btn_send_hand_target_clicked()
+{
+
+  controller::HandSelect hand;
+
+  auto t1 = ui->comboBox_hand_target1->currentIndex();
+  auto t2 = ui->comboBox_hand_target2->currentIndex();
+  auto t3 = static_cast<double>(ui->hand_target_slider->value());
+  auto t4 = static_cast<double>(ui->spinBox_hand_dq->value());
+  auto t5 = static_cast<double>(ui->spinBox_hand_tau->value());
+
+  if (t1 == 0)
+  {
+    hand = controller::HandSelect::kLeftHand;
+  }
+  else if (t1 == 1)
+  {
+    hand = controller::HandSelect::kRightHand;
+  }
+
+  hand_target_.q_d[t2] = t3;
+  hand_target_.dq_d[t2] = t4;
+  hand_target_.tau_collision[t2] = t5;
+
+  robot_->setHandTarget(hand, hand_target_);
+
 }

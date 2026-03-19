@@ -15,8 +15,14 @@ struct ControlTypeBase
 struct ControlCommand{
   std::array<double, 7> left_arm{0.0};
   std::array<double, 7> right_arm{0.0};
-  std::array<double, 4> waist{0.0};
-  std::array<double, 4> waist_tau_offset{0.0};
+  std::array<double, 6> waist{0.0};
+  std::array<double, 6> waist_tau_offset{0.0};
+};
+
+struct HandCommand{
+  std::array<double, 7> q_d{255};
+  std::array<double, 7> dq_d{0};
+  std::array<double, 7> tau_collision{0};
 };
 
 class Torques : public ControlTypeBase

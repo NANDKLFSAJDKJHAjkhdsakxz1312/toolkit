@@ -118,8 +118,8 @@ class CsvSaver {
           if (std::chrono::duration_cast<std::chrono::seconds>(now - last_report_time).count() >= 1) {
               if (total_rows_written > 0) {
                   double avg_time = static_cast<double>(total_duration_us) / total_rows_written;
-                  std::cout << "[CsvSaver Info] Avg write time: " << avg_time 
-                            << " us/row (Total rows this sec: " << total_rows_written << ")" << "\n";
+                //   std::cout << "[CsvSaver Info] Avg write time: " << avg_time 
+                //             << " us/row (Total rows this sec: " << total_rows_written << ")" << "\n";
               }
               total_duration_us = 0;
               total_rows_written = 0;
