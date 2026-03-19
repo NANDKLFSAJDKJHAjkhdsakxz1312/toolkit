@@ -10,7 +10,7 @@
 
 #include "csv_saver.hpp"
 #include "motion_data_loader.h"
-#include "controller_api.h"
+#include "ZdlController/controller_api.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -50,7 +50,7 @@ private:
   std::vector<double> motion_positions_;
   std::vector<double> motion_velocities_;
 
-  controller::HandCommand hand_target_;
+  controller::HandCommand hand_target_{255.0};
 
 private slots:
   void on_btn_e_stop_clicked();

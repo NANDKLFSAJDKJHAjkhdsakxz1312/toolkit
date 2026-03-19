@@ -283,6 +283,8 @@ void MainWindow::on_btn_s1_clicked()
   if (ui->btn_left_only->isChecked())
   {
     config.arm_mode = controller::CurrentArmMode::kLeftArmOnly;
+    config.part_config.push_back(controller::RobotParts::kLeftArm);
+    config.part_config.push_back(controller::RobotParts::kLeftHand);
   }
   else if (ui->btn_right_only->isChecked())
   {
@@ -291,6 +293,10 @@ void MainWindow::on_btn_s1_clicked()
   else if (ui->btn_duo->isChecked())
   {
     config.arm_mode = controller::CurrentArmMode::kDualArm;
+    config.part_config.push_back(controller::RobotParts::kRightArm);
+    config.part_config.push_back(controller::RobotParts::kLeftArm);
+    config.part_config.push_back(controller::RobotParts::kRightHand);
+    config.part_config.push_back(controller::RobotParts::kLeftHand);
   }
   else if (ui->btn_waist_only->isChecked())
   {
@@ -390,9 +396,9 @@ void MainWindow::on_btn_f1_clicked()
 
     for (int i = 0; i < 7; ++i)
     {
-      q_cmd.right_arm[i] = toolkit::kJointDirectionFlag[i] ? motion_positions_[i] * 2 * M_PI / 360.0
+      q_cmd.right_arm.q_d[i] = toolkit::kJointDirectionFlag[i] ? motion_positions_[i] * 2 * M_PI / 360.0
                                                            : -motion_positions_[i] * 2 * M_PI / 360.0;
-      q_cmd.left_arm[i] = toolkit::kJointDirectionFlag[i + 7] ? motion_positions_[i + 7] * 2 * M_PI / 360.0
+      q_cmd.left_arm.q_d[i] = toolkit::kJointDirectionFlag[i + 7] ? motion_positions_[i + 7] * 2 * M_PI / 360.0
                                                               : -motion_positions_[i + 7] * 2 * M_PI / 360.0;
       // auto arc1 = toolkit::kJointDirectionFlag[i] ? motion_positions[i] * 2 * M_PI / 360.0
       //                                             : -motion_positions[i] * 2 * M_PI / 360.0;
@@ -630,9 +636,9 @@ void MainWindow::on_btn_f9_clicked()
 
     for (int i = 0; i < 7; ++i)
     {
-      q_cmd.right_arm[i] = toolkit::kJointDirectionFlag[i] ? motion_positions[i] * 2 * M_PI / 360.0
+      q_cmd.right_arm.q_d[i] = toolkit::kJointDirectionFlag[i] ? motion_positions[i] * 2 * M_PI / 360.0
                                                            : -motion_positions[i] * 2 * M_PI / 360.0;
-      q_cmd.left_arm[i] = toolkit::kJointDirectionFlag[i+7] ? motion_positions[i+7] * 2 * M_PI / 360.0
+      q_cmd.left_arm.q_d[i] = toolkit::kJointDirectionFlag[i+7] ? motion_positions[i+7] * 2 * M_PI / 360.0
                                                           : -motion_positions[i+7] * 2 * M_PI / 360.0;
     }
 
@@ -707,7 +713,7 @@ void MainWindow::on_btn_send_hand_target_clicked()
 
   hand_target_.q_d[t2] = t3;
   hand_target_.dq_d[t2] = t4;
-  hand_target_.tau_collision[t2] = t5;
+  hand_target_.tau_d[t2] = t5;
 
   robot_->setHandTarget(hand, hand_target_);
 

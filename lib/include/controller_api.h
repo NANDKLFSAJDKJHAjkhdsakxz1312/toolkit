@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 
-#include "control_types.h"
+#include "ZdlController/control_types.h"
 #include "robot_state.h"
 
 // 只兼容 Linux/GCC/Clang
