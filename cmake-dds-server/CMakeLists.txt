@@ -36,7 +36,7 @@ set(CMAKE_PREFIX_PATH
 # ZdlController
 set(ZdlController_DIR "${ZDL_SOFTWARE_DIR}/lib/cmake/ZdlController")
 
-# 找包
+# 找 包
 find_package(ZdlController REQUIRED)
 find_package(Eigen3 3.4 REQUIRED)
 find_package(spdlog REQUIRED)
