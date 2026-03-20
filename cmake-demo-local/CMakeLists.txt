@@ -18,17 +18,15 @@ set(CMAKE_AUTORCC ON)
 
 set(LOCAL_LIBRARY_BASE "/home/root/software")
 set(QT5_PATH "${LOCAL_LIBRARY_BASE}/qt5.15.18_install")
-list(APPEND CMAKE_PREFIX_PATH ${QT5_PATH})
+set(ZDL_SOFTWARE_PATH "${LOCAL_LIBRARY_BASE}/zdl-wanghuo-software")
+list(APPEND CMAKE_PREFIX_PATH 
+  ${QT5_PATH}
+  ${ZDL_SOFTWARE_PATH}
+)
 
-# 手动指定依赖库路径
-set(EIGEN3_INCLUDE_DIR "${LOCAL_LIBRARY_BASE}/eigen3.4.0_install/include/eigen3")
-set(SPDLOG_INCLUDE_DIR "${LOCAL_LIBRARY_BASE}/spdlog1.16.0_install/include")
-set(YAML_CPP_INCLUDE_DIR "${LOCAL_LIBRARY_BASE}/yaml-cpp0.8.0_install/include")
-set(YAML_CPP_LIBRARIES "${LOCAL_LIBRARY_BASE}/yaml-cpp0.8.0_install/lib64/libyaml-cpp.so")
-set(BOOST_LIBRARY_DIR "${LOCAL_LIBRARY_BASE}/boost_1.85.0_install/lib")
-
-# 查找 Qt5
 find_package(Qt5 COMPONENTS Widgets Core Gui REQUIRED)
+
+find_package(ZdlController REQUIRED)
 
 # qt_add_resources(RESOURCES ../resources.qrc)
 
@@ -47,9 +45,6 @@ target_include_directories(demo
     ../lib/include
     ../include
     ../src
-    ${EIGEN3_INCLUDE_DIR}
-    ${SPDLOG_INCLUDE_DIR}
-    ${YAML_CPP_INCLUDE_DIR}
 )
 
 target_link_libraries(demo
@@ -57,12 +52,9 @@ target_link_libraries(demo
     Qt5::Widgets
     Qt5::Core
     Qt5::Gui
-    ${YAML_CPP_LIBRARIES}
-    ${BOOST_LIBRARY_DIR}/libboost_filesystem.so
-    ${BOOST_LIBRARY_DIR}/libboost_serialization.so
 
-    "${CMAKE_CURRENT_SOURCE_DIR}/../lib/libzdl_controller_static.so"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../ecmaster/libzdl_ecmaster.so"
+    ZdlController::zdl_controller
+    "${ZDL_SOFTWARE_PATH}/lib/libzdl_ecmaster.so"
 
     pthread
 )
