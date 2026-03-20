@@ -1,0 +1,13 @@
+module zdl {
+  module msg {
+    module dds_ {
+      enum EnableMode{kCSP,kCST};
+
+      struct EnableRequest {
+          uint32 request_id;
+          EnableMode request_mode;
+        };
+
+    };
+  };
+};

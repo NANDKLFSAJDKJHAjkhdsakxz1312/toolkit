@@ -1,0 +1,35 @@
+module zdl {
+  module msg {
+    module dds_ {
+      enum CurrentArmMode {
+        kDualArm,
+        kLeftArmOnly,
+        kRightArmOnly,
+        kFoldedWaistOnly
+      };
+
+      struct Inertia {
+        double ixx; double iyy; double izz;
+        double ixy; double ixz; double iyz;
+      };
+
+      struct EndEffector {
+        double m;
+        double com[3];
+        Inertia inertia;
+      };
+
+      struct StartConfig {
+        CurrentArmMode arm_mode;
+        double distance_between_arm;
+        EndEffector left_end_effector;
+        EndEffector right_end_effector;
+      };
+
+      struct StartRequest {
+        uint32 request_id; // CycloneDDS C++ 对应 uint32_t
+        StartConfig config;
+      };
+    };
+  };
+};

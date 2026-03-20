@@ -9,20 +9,20 @@ set(ZDL_SOFTWARE_DIR "/home/root/software/zdl-wanghuo-software")
 
 # 源文件
 set(SOURCES
-    main.cpp
-    ui_cmd_server.cpp
-    idl/start_task.c
-    utils/struct_init.cpp
-    idl/stop_task.c
-    idl/enable.c
-    idl/disable.c
-    idl/set_zero_position.c
-    src/motion_data_loader.cpp
-    idl/return_zero.c
-    idl/jog_command.c
-    idl/robot_state.c
-    idl/waist_target.c
-    idl/wheel_stop.c
+    ../main.cpp
+    ../ui_cmd_server.cpp
+    ../idl/start_task.c
+    ../utils/struct_init.cpp
+    ../idl/stop_task.c
+    ../idl/enable.c
+    ../idl/disable.c
+    ../idl/set_zero_position.c
+    ../src/motion_data_loader.cpp
+    ../idl/return_zero.c
+    ../idl/jog_command.c
+    ../idl/robot_state.c
+    ../idl/waist_target.c
+    ../idl/wheel_stop.c
 )
 
 # 依赖路径
@@ -49,6 +49,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # ✅ 正确的 include（关键修复）
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${ZDL_SOFTWARE_DIR}/lib/include
+    ../include
 )
 
 # 链接库

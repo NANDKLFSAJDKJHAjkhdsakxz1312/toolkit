@@ -1,0 +1,19 @@
+module zdl {
+  module msg {
+    module dds_ {
+        enum Direction
+        {
+            FORWARD,
+            BACKWARD
+        };
+
+        struct JogCommand
+        {
+            long joint_id;
+            Direction direction;
+            boolean active;
+        };
+
+    };
+  };
+};

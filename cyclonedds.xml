@@ -1,0 +1,14 @@
+<CycloneDDS>
+  <Domain>
+    <General>
+      <Interfaces>
+        <NetworkInterface name="enP4p65s0"/>
+      </Interfaces>
+      <AllowMulticast>true</AllowMulticast>
+    </General>
+    <Tracing>
+      <Verbosity>fine</Verbosity>
+      <OutputFile>dds.log</OutputFile>
+    </Tracing>
+  </Domain>
+</CycloneDDS>

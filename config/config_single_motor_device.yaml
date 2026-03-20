@@ -1,0 +1,15 @@
+is_self_encoder: false
+spd_log_level: 1 # trace=0, debug=1, info=2, warn=3
+# 左臂
+joints: #固定架单左臂
+  - joint_id: 0
+    slave_id: 0       # 填写实际的从站ID
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 180   #关节角上限
+      lower_limit_deg: -180  #关节角下限
+      round_flag: true  # 方向标志（true/false）
