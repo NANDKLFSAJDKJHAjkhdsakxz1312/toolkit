@@ -16,6 +16,7 @@
 #include "idl/waist_target.h"
 #include "idl/wheel_stop.h"
 #include "idl/estop.h"
+#include "idl/stop_mission.h"
 #include "linear_interpolator.h"
 #include "idl/csp_command.h"
 
@@ -63,6 +64,10 @@ public:
     void handle_e_stop();
     void handle_csp_command();
     void startCSPControl();
+    void handle_stop_mission();
+
+
+    void exportInterpolatedPositions(const std::string& filename);
 private:
 
     std::unique_ptr<controller::ControllerInterface> robot_;
@@ -88,6 +93,8 @@ private:
     dds_entity_t reader_wheel_stop = DDS_ENTITY_NIL;
     dds_entity_t topic_e_stop = DDS_ENTITY_NIL;
     dds_entity_t reader_e_stop = DDS_ENTITY_NIL;
+    dds_entity_t topic_stop_mission = DDS_ENTITY_NIL;
+    dds_entity_t reader_stop_mission = DDS_ENTITY_NIL;
     dds_listener_t* listener_;
     std::mutex robot_mutex_;
 
@@ -106,5 +113,7 @@ private:
     dds_entity_t reader_csp_cmd = DDS_ENTITY_NIL;
     dds_entity_t topic_csp_cmd = DDS_ENTITY_NIL;
     bool csp_running_ = false;
+    std::vector<std::array<double, 14>> interpolated_positions_;
+    std::mutex data_mutex_; 
 };
 

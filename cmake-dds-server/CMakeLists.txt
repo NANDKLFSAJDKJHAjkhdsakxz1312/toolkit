@@ -26,6 +26,7 @@ set(SOURCES
     ../idl/estop.c
     ../linear_interpolator.cpp
     ../idl/csp_command.c
+    ../idl/stop_mission.c
 )
 
 # 依赖路径

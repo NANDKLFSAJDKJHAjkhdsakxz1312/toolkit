@@ -4,3 +4,4 @@ build*/
 extra_files/
 *.user*
 *.zip
+*.csv

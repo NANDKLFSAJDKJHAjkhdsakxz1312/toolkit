@@ -400,6 +400,33 @@ bool UiCmdServer::initDds() {
 
 
 
+    //任务停止指令
+    topic_stop_mission = dds_create_topic(
+        participant_,
+        &zdl_msg_dds__StopMissionRequest_desc,
+        "zdl/msg/dds/request_ui_cmd/stop_mission",
+        NULL, NULL
+    );
+    if (topic_stop_mission < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic_stop_mission));
+        return false;
+    }
+    spdlog::info("topic_stop_mission created successfully");
+
+        dds_qos_t* qos_stop_mission = dds_create_qos();
+    dds_qset_reliability(qos_stop_mission, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+    dds_qset_durability(qos_stop_mission, DDS_DURABILITY_VOLATILE);
+
+    reader_stop_mission = dds_create_reader(subscriber_, topic_stop_mission, qos_stop_mission, listener_);
+
+    dds_delete_qos(qos_stop_mission);
+
+        if (reader_stop_mission < 0) {
+            DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-reader_stop_mission));
+            return false;
+        }
+        spdlog::info("reader_stop_mission created successfully");
+
 
 
 
@@ -486,11 +513,13 @@ void UiCmdServer::handle_data(dds_entity_t reader) {
     else if(reader == reader_csp_cmd){
         handle_csp_command();
     }
+    else if (reader == reader_stop_mission){
+        handle_stop_mission();
+    }
     else {
         spdlog::warn("未知的 reader 收到数据可用事件: {}", reader);
     }
-
-  
+    
 }
 
 void UiCmdServer::shutdownDds() {
@@ -541,7 +570,7 @@ void UiCmdServer::on_subscription_matched(
         }
         else if (reader == reader_disable) {
             spdlog::info(
-                "[DISABLE] 匹配变化 current={}, total={}",
+                "[DISABLE] 匹配变化 current={}, total=reader_csp_cmd{}",
                 status.current_count,
                 status.total_count);
         }
@@ -584,6 +613,12 @@ void UiCmdServer::on_subscription_matched(
         else if (reader == reader_csp_cmd) {
             spdlog::info(
                 "[CSP_COMMAND] 匹配变化 current={}, total={}",
+                status.current_count,
+                status.total_count);
+        }
+        else if (reader == reader_stop_mission) {
+            spdlog::info(
+                "[STOP_MISSION] 匹配变化 current={}, total={}",
                 status.current_count,
                 status.total_count);
         }
@@ -826,6 +861,30 @@ void UiCmdServer::on_subscription_matched(
 
 
 
+
+
+    // ==== stop_mission topic =====
+    if (reader_stop_mission <= DDS_ENTITY_NIL) {
+        spdlog::warn("[STOP_MISSION] reader 尚未初始化，无法查询匹配状态");
+    } else {
+        dds_subscription_matched_status_t st{};
+        dds_return_t rc = dds_get_subscription_matched_status(reader_stop_mission, &st);
+
+        if (rc != DDS_RETCODE_OK) {
+            spdlog::error("[STOP_MISSION] dds_get_subscription_matched_status failed: {}", 
+                          dds_strretcode(-rc));
+        } else {
+            spdlog::info(
+                "[STOP_MISSION] 匹配状态: current={}, total={}, current_change={}, total_change={}",
+                st.current_count,
+                st.total_count,
+                st.current_count_change,
+                st.total_count_change);
+        }
+    }
+
+
+
     // ===== writer_state (机器人状态发布者) =====
     if (writer_state_ <= DDS_ENTITY_NIL) {
         spdlog::warn("[ROBOT_STATE] writer 尚未初始化，无法查询匹配状态");
@@ -995,7 +1054,8 @@ void UiCmdServer::handle_stop() {
 }
 
 
-void UiCmdServer::handle_enable() {
+void UiCmdServer::handle_enable() 
+{
 
     //spdlog::info("enable command");
 
@@ -1040,30 +1100,27 @@ void UiCmdServer::handle_enable() {
                 spdlog::error("robot 未初始化");
             }
             else {
+               
                 std::lock_guard<std::mutex> lock(robot_mutex_);
 
                 // 这里调用你的机器人控制接口
                 robot_->enable(zdl::msg::dds_::ToControllerRequestMode(msg->request_mode));
 
                 spdlog::info("robot enable 执行完成");
-                if (!csp_running_)
-                {
-                    spdlog::info("进入CSP回调");
-                    startCSPControl();
-                    csp_running_ = true;
-                }
+                
+                
+       
 
-                spdlog::info("CSP 控制已启动");
             }
-        }
-
-    }
 
     if (rc < 0) {
         spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
     }
 
     zdl_msg_dds__EnableRequest_free(samples[0], DDS_FREE_ALL);
+    }
+}
+
 }
 
 
@@ -1185,6 +1242,7 @@ void UiCmdServer::handle_return_zero(){
     }
 
     zdl_msg_dds__ReturnZeroRequest_free(samples[0], DDS_FREE_ALL);
+    exportInterpolatedPositions("/home/root/workspace/zdl-controller-toolkit/interpolated_positions.csv");
 }
 
 
@@ -1489,12 +1547,31 @@ void UiCmdServer::handle_csp_command()
 
         if (robot_)
         {
+            if(!csp_running_){
+                startCSPControl();
+                csp_running_ = true;
+                
+            }
+
             interpolator_.receive(msg->timestamp, std::array<double,14>{
                 msg->joint[0], msg->joint[1], msg->joint[2], msg->joint[3],
                 msg->joint[4], msg->joint[5], msg->joint[6], msg->joint[7],
                 msg->joint[8], msg->joint[9], msg->joint[10], msg->joint[11],
                 msg->joint[12], msg->joint[13]
             });
+            // auto mission = robot_->getRobotState().current_mission;
+            // spdlog::info("robot_mission(enum int): {}", static_cast<int>(mission));
+            // spdlog::info("插值器receive");
+
+            // 打印角度
+            // std::ostringstream oss;
+            // oss << "关节角度: [";
+            // for (int i = 0; i < 14; ++i) {
+            //     oss << msg->joint[i];
+            //     if (i != 13) oss << ", ";
+            // }
+            // oss << "]";
+            // spdlog::info(oss.str());
         }
         else
         {
@@ -1529,9 +1606,15 @@ void UiCmdServer::startCSPControl()
         std::array<double, 14> q_interp;
 
         bool ok = interpolator_.get(q_interp);
-
+        if (ok)
+        {
+            std::lock_guard<std::mutex> lock(data_mutex_);
+            interpolated_positions_.push_back(q_interp);
+            spdlog::info("存储了");
+        }
         if (!ok)
         {
+            spdlog::warn("插值器无数据，返回当前关节位置");
             controller::ControlCommand cmd;
             for (int i = 0; i < 7; ++i)
             {
@@ -1539,11 +1622,12 @@ void UiCmdServer::startCSPControl()
                 cmd.left_arm.q_d[i]  = s.left_arm.q[i];
             }
             return controller::JointPositions(cmd);
-            spdlog::warn("插值器无数据，返回当前关节位置");
+            
         }
 
         for (int i = 0; i < 7; ++i)
         {
+
             spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
             double r = q_interp[i] * 2 * M_PI / 360.0;
             double l = q_interp[i + 7] * 2 * M_PI / 360.0;
@@ -1556,8 +1640,74 @@ void UiCmdServer::startCSPControl()
         }
 
         return controller::JointPositions(q_cmd);
+     
     };
 
     robot_->runCycleJointMotion(motion_callback); 
     spdlog::info("after runCycleJointMotion");
+}
+
+
+
+void UiCmdServer::exportInterpolatedPositions(const std::string& filename)
+{
+    std::ofstream ofs(filename);
+    if (!ofs.is_open())
+    {
+        spdlog::error("无法打开文件 {}", filename);
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(data_mutex_);
+
+    for (const auto& pos : interpolated_positions_)
+    {
+        for (size_t i = 0; i < pos.size(); ++i)
+        {
+            ofs << pos[i];
+            if (i != pos.size() - 1) ofs << ",";
+        }
+        ofs << "\n";
+    }
+
+    spdlog::info("已导出插值角度数据到 {}", filename);
+}
+
+
+
+
+void UiCmdServer::handle_stop_mission(){
+    spdlog::info("stop_mission received");
+
+    void* samples[1];
+    dds_sample_info_t infos[1];
+
+    samples[0] = zdl_msg_dds__StopMissionRequest__alloc();
+
+    dds_return_t rc;
+
+    while ((rc = dds_take(reader_stop_mission, samples, infos, 1, 1)) > 0)
+    {
+        if (!infos[0].valid_data)
+            continue;
+
+        auto* msg = static_cast<zdl_msg_dds__StopMissionRequest*>(samples[0]);
+
+        spdlog::info("========== 收到 Stop Mission 指令 ==========");
+        spdlog::info("request_id={}", msg->request_id);
+
+        if (robot_)
+        {
+            std::lock_guard<std::mutex> lock(robot_mutex_);
+            robot_->stopCurrentMisiion();
+        }
+        else
+        {
+            spdlog::error("robot 未初始化");
+        }
+
+        spdlog::info("=================================");
+    }
+
+
 }
