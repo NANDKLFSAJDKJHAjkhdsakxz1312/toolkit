@@ -13,11 +13,8 @@ void LinearInterpolator::receive(double timestamp, const std::array<double, DOF>
         return;
     }
 
-    // 👉 第二个点开始，构造插值段
-    t1_ = timestamp;
-    q1_ = q;
-
-    double dt = t1_ - t0_;
+    // 👉 第二个点开始，使用“上一帧接收值 -> 当前接收值”构造插值段
+    double dt = timestamp - last_t_;
 
     // =========================
     // ❗异常保护
@@ -27,7 +24,10 @@ void LinearInterpolator::receive(double timestamp, const std::array<double, DOF>
         // 数据异常，丢弃
         return;
     }
-
+    t0_ = last_t_;
+    q0_ = last_q_;
+    t1_ = timestamp;
+    q1_ = q;
     // =========================
     // ⭐ 计算插值步数
     // =========================
@@ -39,9 +39,9 @@ void LinearInterpolator::receive(double timestamp, const std::array<double, DOF>
     step_ = 0;
     has_segment_ = true;
 
-    // 👉 更新上一点
-    t0_ = t1_;
-    q0_ = q1_;
+        // 👉 记录最近一次接收值，供下一段使用
+    last_t_ = timestamp;
+    last_q_ = q;
 }
 
 bool LinearInterpolator::get(std::array<double, DOF>& q_out)
@@ -74,8 +74,9 @@ bool LinearInterpolator::get(std::array<double, DOF>& q_out)
     // =========================
     if (step_ > total_steps_)
     {
-        // 保持最后一个点
+        // 当前段已经结束，输出最后一个点，并等待下一段
         q_out = q1_;
+        has_segment_ = false;
     }
 
     return true;

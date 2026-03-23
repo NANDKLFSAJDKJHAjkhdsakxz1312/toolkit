@@ -20,9 +20,11 @@ private:
 
     std::array<double, DOF> q0_{};
     std::array<double, DOF> q1_{};
+    std::array<double, DOF> last_q_{};
 
     double t0_ = 0.0;
     double t1_ = 0.0;
+    double last_t_ = 0.0;
 
     int step_ = 0;
     int total_steps_ = 1;
