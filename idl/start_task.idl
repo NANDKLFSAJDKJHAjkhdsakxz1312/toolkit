@@ -19,11 +19,22 @@ module zdl {
         Inertia inertia;
       };
 
+      enum RobotParts {
+          kLeftArm,
+          kRightArm,
+          kLeftHand,
+          kRightHand,
+          kHead,
+          kFoldedWaist,
+          kDoubleWheel
+      };
+
       struct StartConfig {
-        CurrentArmMode arm_mode;
-        double distance_between_arm;
-        EndEffector left_end_effector;
-        EndEffector right_end_effector;
+          CurrentArmMode arm_mode;
+          double distance_between_arm;
+          EndEffector left_end_effector;
+          EndEffector right_end_effector;
+          sequence<RobotParts> part_config;
       };
 
       struct StartRequest {

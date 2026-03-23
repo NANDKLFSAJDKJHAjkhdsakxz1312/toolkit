@@ -6,6 +6,29 @@ namespace dds_ {
 
 namespace {
 
+controller::RobotParts ToControllerRobotPart(DdsRobotParts part)
+{
+    switch (part) {
+        case zdl_msg_dds__kLeftArm:
+            return controller::RobotParts::kLeftArm;
+        case zdl_msg_dds__kRightArm:
+            return controller::RobotParts::kRightArm;
+        case zdl_msg_dds__kLeftHand:
+            return controller::RobotParts::kLeftHand;
+        case zdl_msg_dds__kRightHand:
+            return controller::RobotParts::kRightHand;
+        case zdl_msg_dds__kHead:
+            return controller::RobotParts::kHead;
+        case zdl_msg_dds__kFoldedWaist:
+            return controller::RobotParts::kFoldedWaist;
+        case zdl_msg_dds__kDoubleWheel:
+            return controller::RobotParts::kDoubleWheel;
+        default:
+            throw std::runtime_error("unknown DdsRobotParts");
+    }
+}
+
+
 controller::CurrentArmMode ToControllerCurrentArmMode(DdsCurrentArmMode mode)
 {
   switch (mode)
@@ -86,6 +109,22 @@ DdsEndEffector ToDdsEndEffector(const controller::StartConfig::EndEffector& in)
   return out;
 }
 
+DdsRobotParts ToDdsRobotPart(controller::RobotParts part)
+{
+    switch (part) {
+        case controller::RobotParts::kLeftArm:       return zdl_msg_dds__kLeftArm;
+        case controller::RobotParts::kRightArm:      return zdl_msg_dds__kRightArm;
+        case controller::RobotParts::kLeftHand:      return zdl_msg_dds__kLeftHand;
+        case controller::RobotParts::kRightHand:     return zdl_msg_dds__kRightHand;
+        case controller::RobotParts::kHead:          return zdl_msg_dds__kHead;
+        case controller::RobotParts::kFoldedWaist:   return zdl_msg_dds__kFoldedWaist;
+        case controller::RobotParts::kDoubleWheel:   return zdl_msg_dds__kDoubleWheel;
+        default: throw std::runtime_error("unknown RobotParts");
+    }
+}
+
+
+
 }  // namespace
 
 // 默认初始化规则与 controller::StartConfig 保持一致:
@@ -111,12 +150,20 @@ DdsStartRequest MakeDefaultStartRequest(
 
 controller::StartConfig ToControllerStartConfig(const DdsStartConfig& in)
 {
-  controller::StartConfig out{};
-  out.arm_mode = ToControllerCurrentArmMode(in.arm_mode);
-  out.distance_between_arm = in.distance_between_arm;
-  out.left_end_effector = ToControllerEndEffector(in.left_end_effector);
-  out.right_end_effector = ToControllerEndEffector(in.right_end_effector);
-  return out;
+    controller::StartConfig out{};
+    out.arm_mode = ToControllerCurrentArmMode(in.arm_mode);
+    out.distance_between_arm = in.distance_between_arm;
+    out.left_end_effector = ToControllerEndEffector(in.left_end_effector);
+    out.right_end_effector = ToControllerEndEffector(in.right_end_effector);
+
+    // ✅ 拷贝 part_config 序列到 std::vector
+    out.part_config.clear();
+    for (uint32_t i = 0; i < in.part_config._length; ++i)
+    {
+        out.part_config.push_back(ToControllerRobotPart(in.part_config._buffer[i]));
+    }
+
+    return out;
 }
 
 controller::StartConfig ToControllerStartConfig(const DdsStartRequest& in)
@@ -131,6 +178,24 @@ DdsStartConfig ToDdsStartConfig(const controller::StartConfig& in)
   out.distance_between_arm = in.distance_between_arm;
   out.left_end_effector = ToDdsEndEffector(in.left_end_effector);
   out.right_end_effector = ToDdsEndEffector(in.right_end_effector);
+  // 3️⃣ 处理 part_config
+    size_t n = in.part_config.size();
+    if (n > 0) {
+        out.part_config._buffer = dds_sequence_zdl_msg_dds__RobotParts_allocbuf(n);
+        out.part_config._length = n;
+        out.part_config._maximum = n;
+        out.part_config._release = true;
+
+        for (size_t i = 0; i < n; ++i) {
+            out.part_config._buffer[i] = ToDdsRobotPart(in.part_config[i]);
+        }
+    } else {
+        // 空序列
+        out.part_config._buffer = nullptr;
+        out.part_config._length = 0;
+        out.part_config._maximum = 0;
+        out.part_config._release = true;
+    }
   return out;
 }
 

@@ -15,6 +15,9 @@
 #include "utils/state_conversion_to_dds.h"
 #include "idl/waist_target.h"
 #include "idl/wheel_stop.h"
+#include "idl/estop.h"
+#include "linear_interpolator.h"
+#include "idl/csp_command.h"
 
 
 class UiCmdServer {
@@ -57,7 +60,9 @@ public:
     void handle_waist_target();
     void publishRobotState();
     void handle_wheel_stop();
-
+    void handle_e_stop();
+    void handle_csp_command();
+    void startCSPControl();
 private:
 
     std::unique_ptr<controller::ControllerInterface> robot_;
@@ -81,6 +86,8 @@ private:
     dds_entity_t reader_waist_target = DDS_ENTITY_NIL;
     dds_entity_t topic_wheel_stop = DDS_ENTITY_NIL;
     dds_entity_t reader_wheel_stop = DDS_ENTITY_NIL;
+    dds_entity_t topic_e_stop = DDS_ENTITY_NIL;
+    dds_entity_t reader_e_stop = DDS_ENTITY_NIL;
     dds_listener_t* listener_;
     std::mutex robot_mutex_;
 
@@ -92,5 +99,12 @@ private:
 
     std::thread state_thread_;
     std::atomic<bool> running_{true};
+
+
+
+    LinearInterpolator interpolator_;
+    dds_entity_t reader_csp_cmd = DDS_ENTITY_NIL;
+    dds_entity_t topic_csp_cmd = DDS_ENTITY_NIL;
+    bool csp_running_ = false;
 };
 

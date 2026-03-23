@@ -15,7 +15,7 @@ using DdsInertia = zdl_msg_dds__Inertia;
 using DdsEndEffector = zdl_msg_dds__EndEffector;
 using DdsStartConfig = zdl_msg_dds__StartConfig;
 using DdsStartRequest = zdl_msg_dds__StartRequest;
-
+using DdsRobotParts = zdl_msg_dds__RobotParts;
 
 // 默认规则与 controller::StartConfig 对齐:
 // arm_mode = kDualArm, distance_between_arm = 0.5, 其余为 0.

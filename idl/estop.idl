@@ -1,0 +1,10 @@
+module zdl {
+  module msg {
+    module dds_ {
+      struct EStopRequest {
+          uint32 request_id;
+        };
+
+    };
+  };
+};

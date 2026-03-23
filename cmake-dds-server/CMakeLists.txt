@@ -23,6 +23,9 @@ set(SOURCES
     ../idl/robot_state.c
     ../idl/waist_target.c
     ../idl/wheel_stop.c
+    ../idl/estop.c
+    ../linear_interpolator.cpp
+    ../idl/csp_command.c
 )
 
 # 依赖路径
@@ -50,6 +53,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${ZDL_SOFTWARE_DIR}/lib/include
     ../include
+   
 )
 
 # 链接库

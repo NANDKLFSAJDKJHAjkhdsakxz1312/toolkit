@@ -334,6 +334,75 @@ bool UiCmdServer::initDds() {
 
 
 
+    //急停指令
+    topic_e_stop = dds_create_topic(
+        participant_,
+        &zdl_msg_dds__EStopRequest_desc,
+        "zdl/msg/dds/request_ui_cmd/e_stop",
+        NULL, NULL
+    );
+    if (topic_e_stop < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic_e_stop));
+        return false;
+    }
+    spdlog::info("topic_e_stop created successfully");
+
+    dds_qos_t* qos_e_stop = dds_create_qos();
+    dds_qset_reliability(qos_e_stop, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+    dds_qset_durability(qos_e_stop, DDS_DURABILITY_VOLATILE);
+
+    reader_e_stop = dds_create_reader(subscriber_, topic_e_stop, qos_e_stop, listener_);
+    dds_delete_qos(qos_e_stop);
+
+        if (reader_e_stop < 0) {
+            DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-reader_e_stop));
+            return false;
+        }
+        spdlog::info("reader_e_stop created successfully");
+
+
+
+    //CSP指令
+    topic_csp_cmd = dds_create_topic(
+        participant_,
+        &zdl_msg_dds__CSPCommand_desc,
+        "zdl/msg/dds/request_ui_cmd/csp_command",
+        NULL, NULL
+    );
+    if (topic_csp_cmd < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic_csp_cmd));
+        return false;
+    }
+
+    spdlog::info("topic_csp_cmd created successfully");
+    dds_qos_t* qos_csp_cmd = dds_create_qos();
+
+    //  Best Effort（允许丢包，降低延迟）
+    dds_qset_reliability(qos_csp_cmd, DDS_RELIABILITY_BEST_EFFORT, 0);
+
+    // 不要历史数据
+    dds_qset_durability(qos_csp_cmd, DDS_DURABILITY_VOLATILE);
+
+    // 只保留最新一条
+    dds_qset_history(qos_csp_cmd, DDS_HISTORY_KEEP_LAST, 1);
+
+    //  限制资源（防止堆积）
+    dds_qset_resource_limits(qos_csp_cmd, 1, 1, 1);
+    
+    reader_csp_cmd = dds_create_reader(subscriber_, topic_csp_cmd, qos_csp_cmd, listener_);
+    dds_delete_qos(qos_csp_cmd);
+
+        if (reader_csp_cmd < 0) {
+            DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-reader_csp_cmd));
+            return false;
+        }
+        spdlog::info("reader_csp_cmd created successfully");
+
+
+
+
+
+
 
 
     //机器人状态
@@ -410,6 +479,15 @@ void UiCmdServer::handle_data(dds_entity_t reader) {
     }
     else if (reader == reader_wheel_stop){
         handle_wheel_stop();
+    }
+    else if(reader == reader_e_stop){
+        handle_e_stop();
+    }
+    else if(reader == reader_csp_cmd){
+        handle_csp_command();
+    }
+    else {
+        spdlog::warn("未知的 reader 收到数据可用事件: {}", reader);
     }
 
   
@@ -496,6 +574,21 @@ void UiCmdServer::on_subscription_matched(
                 "[WHEEL_STOP] 匹配变化 current={}, total={}",
                 status.current_count,
                 status.total_count);
+        }
+        else if(reader == reader_e_stop){
+            spdlog::info(
+                "[E_STOP] 匹配变化 current={}, total={}",
+                status.current_count,
+                status.total_count);
+        }
+        else if (reader == reader_csp_cmd) {
+            spdlog::info(
+                "[CSP_COMMAND] 匹配变化 current={}, total={}",
+                status.current_count,
+                status.total_count);
+        }
+        else {
+            spdlog::warn("未知的 reader 匹配事件: {}", reader);
         }
     }
 
@@ -687,6 +780,52 @@ void UiCmdServer::on_subscription_matched(
     }
 
 
+
+    // ===== e_stop topic =====
+    if (reader_e_stop <= DDS_ENTITY_NIL) {
+        spdlog::warn("[E_STOP] reader 尚未初始化，无法查询匹配状态");
+    } else {
+        dds_subscription_matched_status_t st{};
+        dds_return_t rc = dds_get_subscription_matched_status(reader_e_stop, &st);
+
+        if (rc != DDS_RETCODE_OK) {
+            spdlog::error("[E_STOP] dds_get_subscription_matched_status failed: {}", 
+                          dds_strretcode(-rc));
+        } else {
+            spdlog::info(
+                "[E_STOP] 匹配状态: current={}, total={}, current_change={}, total_change={}",
+                st.current_count,
+                st.total_count,
+                st.current_count_change,
+                st.total_count_change);
+        }
+    }
+
+
+
+
+    // ===== csp_command topic =====
+    if (reader_csp_cmd <= DDS_ENTITY_NIL) {
+        spdlog::warn("[CSP_COMMAND] reader 尚未初始化，无法查询匹配状态");
+    } else {
+        dds_subscription_matched_status_t st{};
+        dds_return_t rc = dds_get_subscription_matched_status(reader_csp_cmd, &st);
+
+        if (rc != DDS_RETCODE_OK) {
+            spdlog::error("[CSP_COMMAND] dds_get_subscription_matched_status failed: {}", 
+                          dds_strretcode(-rc));
+        } else {
+            spdlog::info(
+                "[CSP_COMMAND] 匹配状态: current={}, total={}, current_change={}, total_change={}",
+                st.current_count,
+                st.total_count,
+                st.current_count_change,
+                st.total_count_change);
+        }
+    }
+
+
+
     // ===== writer_state (机器人状态发布者) =====
     if (writer_state_ <= DDS_ENTITY_NIL) {
         spdlog::warn("[ROBOT_STATE] writer 尚未初始化，无法查询匹配状态");
@@ -787,7 +926,12 @@ void UiCmdServer::handle_start() {
             dds_config.distance_between_arm = msg->config.distance_between_arm;
             dds_config.left_end_effector = msg->config.left_end_effector;
             dds_config.right_end_effector = msg->config.right_end_effector;
-
+            // ✅ 给 part_config 添加 LeftArm
+            dds_config.part_config._length = 1;
+            dds_config.part_config._maximum = 1;
+            dds_config.part_config._release = true; // DDS 负责释放缓冲区
+            dds_config.part_config._buffer = dds_sequence_zdl_msg_dds__RobotParts_allocbuf(1);
+            dds_config.part_config._buffer[0] = zdl_msg_dds__kLeftArm;
             controller::StartConfig controller_config =
                 zdl::msg::dds_::ToControllerStartConfig(dds_config);
 
@@ -902,6 +1046,14 @@ void UiCmdServer::handle_enable() {
                 robot_->enable(zdl::msg::dds_::ToControllerRequestMode(msg->request_mode));
 
                 spdlog::info("robot enable 执行完成");
+                if (!csp_running_)
+                {
+                    spdlog::info("进入CSP回调");
+                    startCSPControl();
+                    csp_running_ = true;
+                }
+
+                spdlog::info("CSP 控制已启动");
             }
         }
 
@@ -1087,6 +1239,7 @@ void UiCmdServer::handle_jog_command()
 
         if (robot_)
         {
+            spdlog::info("enter joggggggggg");
             std::lock_guard<std::mutex> lock(robot_mutex_);
             robot_->jogControl(joint, dir);
         }
@@ -1261,4 +1414,150 @@ void UiCmdServer::handle_publication_matched(
             spdlog::info("[ROBOT_STATE_WRITER] 检测到 UI 端上线，开始同步状态数据。");
         }
     }
+}
+
+
+void UiCmdServer::handle_e_stop(){
+    spdlog::info("e_stop received");
+
+    void* samples[1];
+    dds_sample_info_t infos[1];
+
+    samples[0] = zdl_msg_dds__EStopRequest__alloc();
+
+    dds_return_t rc;
+
+    while ((rc = dds_take(reader_e_stop, samples, infos, 1, 1)) > 0)
+    {
+        if (!infos[0].valid_data)
+            continue;
+
+        auto* msg = static_cast<zdl_msg_dds__EStopRequest*>(samples[0]);
+
+        spdlog::info("========== 收到 E-STOP 指令 ==========");
+        spdlog::info("request_id={}", msg->request_id);
+
+        if (robot_)
+        {
+            std::lock_guard<std::mutex> lock(robot_mutex_);
+            robot_->emergencyStop();
+        }
+        else
+        {
+            spdlog::error("robot 未初始化");
+        }
+
+        spdlog::info("=================================");
+    }
+
+    if (rc < 0)
+    {
+        spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
+    }
+
+    zdl_msg_dds__EStopRequest_free(samples[0], DDS_FREE_ALL);
+}
+
+
+void UiCmdServer::handle_csp_command()
+{
+    // spdlog::info("csp_command received");
+
+    void* samples[1];
+    dds_sample_info_t infos[1];
+
+    samples[0] = zdl_msg_dds__CSPCommand__alloc();
+
+    dds_return_t rc;
+
+    while ((rc = dds_take(reader_csp_cmd, samples, infos, 1, 1)) > 0)
+    {
+        if (!infos[0].valid_data)
+            continue;
+
+        auto* msg = static_cast<zdl_msg_dds__CSPCommand*>(samples[0]);
+
+        // spdlog::info("========== 收到 CSP Command ==========");
+        // spdlog::info("timestamp: {}", msg->timestamp);
+
+        // std::string joints_str;
+        // for (int i = 0; i < 14; ++i)
+        // {
+        //     joints_str += fmt::format("{:.4f} ", msg->joint[i]);
+        // }
+        // spdlog::info("joints: [{}]", joints_str);
+
+        if (robot_)
+        {
+            interpolator_.receive(msg->timestamp, std::array<double,14>{
+                msg->joint[0], msg->joint[1], msg->joint[2], msg->joint[3],
+                msg->joint[4], msg->joint[5], msg->joint[6], msg->joint[7],
+                msg->joint[8], msg->joint[9], msg->joint[10], msg->joint[11],
+                msg->joint[12], msg->joint[13]
+            });
+        }
+        else
+        {
+            spdlog::error("robot 未初始化");
+        }
+
+        // spdlog::info("=================================");
+    }
+
+    if (rc < 0)
+    {
+        spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
+    }
+
+    zdl_msg_dds__CSPCommand_free(samples[0], DDS_FREE_ALL);
+}
+
+
+
+
+
+void UiCmdServer::startCSPControl()
+{
+    spdlog::info("before runCycleJointMotion");
+    auto motion_callback =
+        [this](const controller::RobotState& s,
+               controller::Duration time) -> controller::JointPositions
+    {
+        spdlog::info("motioncallback loop");
+        controller::ControlCommand q_cmd;
+
+        std::array<double, 14> q_interp;
+
+        bool ok = interpolator_.get(q_interp);
+
+        if (!ok)
+        {
+            controller::ControlCommand cmd;
+            for (int i = 0; i < 7; ++i)
+            {
+                cmd.right_arm.q_d[i] = s.right_arm.q[i];
+                cmd.left_arm.q_d[i]  = s.left_arm.q[i];
+            }
+            return controller::JointPositions(cmd);
+            spdlog::warn("插值器无数据，返回当前关节位置");
+        }
+
+        for (int i = 0; i < 7; ++i)
+        {
+            spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
+            double r = q_interp[i] * 2 * M_PI / 360.0;
+            double l = q_interp[i + 7] * 2 * M_PI / 360.0;
+
+            q_cmd.right_arm.q_d[i] =
+                toolkit::kJointDirectionFlag[i] ? r : -r;
+
+            q_cmd.left_arm.q_d[i] =
+                toolkit::kJointDirectionFlag[i + 7] ? l : -l;
+        }
+
+        return controller::JointPositions(q_cmd);
+    };
+
+    robot_->runCycleJointMotion(motion_callback); 
+    spdlog::info("after runCycleJointMotion");
 }

@@ -54,7 +54,7 @@ private:
 
 private slots:
   void on_btn_e_stop_clicked();
-  void on_btn_f1_clicked();
+  void on_btn_f1_clicked();//CSP
   void on_btn_f2_clicked();
   void on_btn_forward_pressed();
   void on_btn_forward_released();
@@ -64,7 +64,7 @@ private slots:
   void on_btn_f5_clicked();
   void on_btn_f6_clicked();
   void on_btn_f7_clicked();
-  void on_btn_f8_clicked();
+  void on_btn_f8_clicked();//停止当前任务
   void on_btn_f9_clicked();
 
   void on_btn_s1_clicked();
@@ -74,10 +74,10 @@ private slots:
   void on_btn_s5_clicked();
 
   void on_btn_send_waist_target_clicked();
-  void on_btn_send_wheel_target_clicked();
+  void on_btn_send_wheel_target_clicked();//轮子指令
   void on_btn_stop_wheel_clicked();
 
-  void on_btn_send_hand_target_clicked();
+  void on_btn_send_hand_target_clicked();//手
 
   void on_speedFactorSlider_valueChanged(int value);
 };
