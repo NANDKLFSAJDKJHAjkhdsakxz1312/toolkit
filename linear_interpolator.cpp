@@ -9,6 +9,8 @@ void LinearInterpolator::receive(double timestamp, const std::array<double, DOF>
     {
         t0_ = timestamp;
         q0_ = q;
+        last_t_ = timestamp;
+        last_q_ = q;
         has_first_point_ = true;
         return;
     }
@@ -21,13 +23,24 @@ void LinearInterpolator::receive(double timestamp, const std::array<double, DOF>
     // =========================
     if (dt <= 0.0 || dt > 0.1)
     {
-        // 数据异常，丢弃
+        // 数据异常，使用当前点重同步，等待下一帧重新建立插值段
+        t0_ = timestamp;
+        t1_ = timestamp;
+        q0_ = q;
+        q1_ = q;
+        last_t_ = timestamp;
+        last_q_ = q;
+        step_ = 0;
+        total_steps_ = 1;
+        has_segment_ = false;
         return;
     }
+
     t0_ = last_t_;
     q0_ = last_q_;
     t1_ = timestamp;
     q1_ = q;
+
     // =========================
     // ⭐ 计算插值步数
     // =========================
@@ -39,7 +52,7 @@ void LinearInterpolator::receive(double timestamp, const std::array<double, DOF>
     step_ = 0;
     has_segment_ = true;
 
-        // 👉 记录最近一次接收值，供下一段使用
+
     last_t_ = timestamp;
     last_q_ = q;
 }
@@ -48,8 +61,14 @@ bool LinearInterpolator::get(std::array<double, DOF>& q_out)
 {
     std::lock_guard<std::mutex> lock(mtx_);
 
-    if (!has_segment_)
+    if (!has_first_point_)
         return false;
+
+    if (!has_segment_)
+    {
+        q_out = last_q_;
+        return true;
+    }
 
     // =========================
     // ⭐ 计算 alpha

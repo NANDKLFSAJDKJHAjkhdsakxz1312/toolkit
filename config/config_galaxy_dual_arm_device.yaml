@@ -1,7 +1,7 @@
 is_self_encoder: false
 spd_log_level: 1 # trace=0, debug=1, info=2, warn=3
+
 joints:
-#右臂
   - joint_id: 0
     slave_id: 2         # 填写实际的从站ID
     sub_id: 1           # 在从站下的子ID
@@ -24,6 +24,7 @@ joints:
     card_slave_id: 5
     brake_addr: 0x2010
     torque_addr: 0x2002
+    brand: 0
     joint_params:
 
   - joint_id: 3
@@ -32,6 +33,7 @@ joints:
     card_slave_id: 5
     brake_addr: 0x2009
     torque_addr: 0x2001
+    brand: 0
     joint_params:
       
   - joint_id: 4 
@@ -58,62 +60,72 @@ joints:
     torque_addr: 0x2000
     joint_params:
 
-# 左臂
+  # 左臂
   - joint_id: 7
-    slave_id: 8       # 填写实际的从站ID
-    sub_id: 1         # 在从站下的子ID
-    card_slave_id: 9    # 填写控制卡的从站ID
+    slave_id: 9         # 填写实际的从站ID
+    sub_id: 1           # 在从站下的子ID
+    card_slave_id: 10   # 填写控制卡的从站ID
     brake_addr: 0x2010
     torque_addr: 0x2002
     joint_params:
 
   - joint_id: 8
-    slave_id: 8
+    slave_id: 9
     sub_id: 2
-    card_slave_id: 9
+    card_slave_id: 10
     brake_addr: 0x2009
     torque_addr: 0x2001
     joint_params:
 
   - joint_id: 9
-    slave_id: 10
+    slave_id: 11
     sub_id: 1
-    card_slave_id: 11
+    card_slave_id: 12
     brake_addr: 0x2010
     torque_addr: 0x2002
     brand: 0
     joint_params:
 
   - joint_id: 10
-    slave_id: 10
+    slave_id: 11
     sub_id: 2
-    card_slave_id: 11
+    card_slave_id: 12
     brake_addr: 0x2009
     torque_addr: 0x2001
     brand: 0
     joint_params:
       
   - joint_id: 11 
-    slave_id: 12
+    slave_id: 13
     sub_id: 2
-    card_slave_id: 13
+    card_slave_id: 14
     brake_addr: 0x2008
     torque_addr: 0x2002
     joint_params:
 
   - joint_id: 12
-    slave_id: 12
+    slave_id: 13
     sub_id: 1
-    card_slave_id: 13
+    card_slave_id: 14
     brake_addr: 0x2008
     torque_addr: 0x2001
     joint_params:
 
   - joint_id: 13
-    slave_id: 12
+    slave_id: 13
     sub_id: 0
-    card_slave_id: 13
+    card_slave_id: 14
     brake_addr: 0x2008
     torque_addr: 0x2000
     joint_params:
 
+hands:
+  - hand_id: 0
+    slave_id: 8
+    hand_joint_id_begin: 14
+    hand_joint_id_end: 20
+
+  - hand_id: 1
+    slave_id: 15
+    hand_joint_id_begin: 21
+    hand_joint_id_end: 27ToControllerStartConfig

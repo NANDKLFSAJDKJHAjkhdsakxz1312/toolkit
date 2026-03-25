@@ -1,26 +1,29 @@
 master:
   id: 0 # 填写实际的主站ID（必须唯一）
-  cpu_set:  6 #指定ethercat的实时任务绑定到哪个核心
+  cpu_set: 6 #指定ethercat的实时任务绑定到哪个核心
   frequency: 1000
-  
-slaves: #(右臂+左臂)
+
+slaves:
+
   - position: 0
     alias: 0
     vendor_id: 0x00100000
     product_code: 0x10f40931
     name: "IF1100_6SW"
+    need_dc: true
 
   - position: 1
     alias: 0
     vendor_id: 0x00100000
     product_code: 0x10f40932
     name: "IF1100_6SW Sub-device"
+    need_dc: true
 
   # 右臂
   - position: 2
     alias: 0
     vendor_id: 0x0000116d
-    product_code: 0x80009001
+    product_code: 0x00009001
     name: "ZDL-Robotics Driver"
     need_dc: true
 
@@ -59,48 +62,59 @@ slaves: #(右臂+左臂)
     name: "ZDL-Robotics HUB"
     need_dc: true
 
-    # 左臂
   - position: 8
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00500202
+    name: "ZDL-Robotics Hand"
+    need_dc: true
+
+  # 左臂
+  - position: 9
     alias: 0
     vendor_id: 0x0000116d
     product_code: 0x00009001
     name: "ZDL-Robotics Driver"
-    need_dc: true
-
-  - position: 9
-    alias: 0
-    vendor_id: 0x0000116d
-    product_code: 0x00009002
-    name: "ZDL-Robotics HUB"
     need_dc: true
 
   - position: 10
     alias: 0
     vendor_id: 0x0000116d
-    product_code: 0x00009001
-    name: "ZDL-Robotics Driver"
+    product_code: 0x00009002
+    name: "ZDL-Robotics HUB"
     need_dc: true
 
   - position: 11
     alias: 0
     vendor_id: 0x0000116d
+    product_code: 0x00009001
+    name: "ZDL-Robotics Driver"
+    need_dc: true
+
+  - position: 12
+    alias: 0
+    vendor_id: 0x0000116d
     product_code: 0x00009002
     name: "ZDL-Robotics HUB"
     need_dc: true
 
-  - position: 12
+  - position: 13
     alias: 0
     vendor_id: 0x0000116d
     product_code: 0x00009001
     name: "ZDL-Robotics Driver"
     need_dc: true
 
-  - position: 13
+  - position: 14
     alias: 0
     vendor_id: 0x0000116d
     product_code: 0x00009002
     name: "ZDL-Robotics HUB"
     need_dc: true
 
-
- 
+  - position: 15
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00500202
+    name: "ZDL-Robotics Hand"
+    need_dc: true

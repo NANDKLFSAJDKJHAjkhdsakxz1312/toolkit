@@ -985,12 +985,13 @@ void UiCmdServer::handle_start() {
             dds_config.distance_between_arm = msg->config.distance_between_arm;
             dds_config.left_end_effector = msg->config.left_end_effector;
             dds_config.right_end_effector = msg->config.right_end_effector;
-            // ✅ 给 part_config 添加 LeftArm
-            dds_config.part_config._length = 1;
-            dds_config.part_config._maximum = 1;
+            // ✅ 给 part_config 添加 LeftArm 和 RightArm
+            dds_config.part_config._length = 2;
+            dds_config.part_config._maximum = 2;
             dds_config.part_config._release = true; // DDS 负责释放缓冲区
-            dds_config.part_config._buffer = dds_sequence_zdl_msg_dds__RobotParts_allocbuf(1);
+            dds_config.part_config._buffer = dds_sequence_zdl_msg_dds__RobotParts_allocbuf(2);
             dds_config.part_config._buffer[0] = zdl_msg_dds__kLeftArm;
+            dds_config.part_config._buffer[1] = zdl_msg_dds__kRightArm;
             controller::StartConfig controller_config =
                 zdl::msg::dds_::ToControllerStartConfig(dds_config);
 
@@ -1600,7 +1601,7 @@ void UiCmdServer::startCSPControl()
         [this](const controller::RobotState& s,
                controller::Duration time) -> controller::JointPositions
     {
-        spdlog::info("motioncallback loop");
+        // spdlog::info("motioncallback loop");
         controller::ControlCommand q_cmd;
 
         std::array<double, 14> q_interp;
@@ -1610,7 +1611,7 @@ void UiCmdServer::startCSPControl()
         {
             std::lock_guard<std::mutex> lock(data_mutex_);
             interpolated_positions_.push_back(q_interp);
-            spdlog::info("存储了");
+            // spdlog::info("存储了");
         }
         if (!ok)
         {
@@ -1628,9 +1629,9 @@ void UiCmdServer::startCSPControl()
         for (int i = 0; i < 7; ++i)
         {
 
-            spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
-            double r = q_interp[i] * 2 * M_PI / 360.0;
-            double l = q_interp[i + 7] * 2 * M_PI / 360.0;
+            // spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
+            double l = q_interp[i] * 2 * M_PI / 360.0;
+            double r = q_interp[i + 7] * 2 * M_PI / 360.0;
 
             q_cmd.right_arm.q_d[i] =
                 toolkit::kJointDirectionFlag[i] ? r : -r;
