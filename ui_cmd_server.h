@@ -95,14 +95,14 @@ private:
     dds_entity_t reader_e_stop = DDS_ENTITY_NIL;
     dds_entity_t topic_stop_mission = DDS_ENTITY_NIL;
     dds_entity_t reader_stop_mission = DDS_ENTITY_NIL;
-    dds_listener_t* listener_;
+    dds_listener_t* listener_ = nullptr;
     std::mutex robot_mutex_;
 
 
 
-    dds_entity_t publisher_;
-    dds_entity_t topic_state_;
-    dds_entity_t writer_state_;
+    dds_entity_t publisher_ = DDS_ENTITY_NIL;
+    dds_entity_t topic_state_ = DDS_ENTITY_NIL;
+    dds_entity_t writer_state_ = DDS_ENTITY_NIL;
 
     std::thread state_thread_;
     std::atomic<bool> running_{true};
@@ -116,4 +116,3 @@ private:
     std::vector<std::array<double, 14>> interpolated_positions_;
     std::mutex data_mutex_; 
 };
-

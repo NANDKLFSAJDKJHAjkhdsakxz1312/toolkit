@@ -439,6 +439,10 @@ bool UiCmdServer::initDds() {
     "zdl/msg/dds/robot_state",
     NULL, NULL
     );
+    if (topic_state_ < 0) {
+        DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topic_state_));
+        return false;
+    }
 
 
     dds_qos_t* qos_state = dds_create_qos();
@@ -447,6 +451,10 @@ bool UiCmdServer::initDds() {
 
     writer_state_ = dds_create_writer(publisher_, topic_state_, qos_state, listener_);
     dds_delete_qos(qos_state);
+    if (writer_state_ < 0) {
+        DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-writer_state_));
+        return false;
+    }
 
 
 
@@ -570,7 +578,7 @@ void UiCmdServer::on_subscription_matched(
         }
         else if (reader == reader_disable) {
             spdlog::info(
-                "[DISABLE] 匹配变化 current={}, total=reader_csp_cmd{}",
+                "[DISABLE] 匹配变化 current={}, total={}",
                 status.current_count,
                 status.total_count);
         }
@@ -1520,66 +1528,45 @@ void UiCmdServer::handle_e_stop(){
 
 void UiCmdServer::handle_csp_command()
 {
-    // spdlog::info("csp_command received");
+    void* samples[8];
+    dds_sample_info_t infos[8];
 
-    void* samples[1];
-    dds_sample_info_t infos[1];
-
-    samples[0] = zdl_msg_dds__CSPCommand__alloc();
+    for (int i = 0; i < 8; ++i)
+    {
+        samples[i] = zdl_msg_dds__CSPCommand__alloc();
+    }
 
     dds_return_t rc;
 
-    while ((rc = dds_take(reader_csp_cmd, samples, infos, 1, 1)) > 0)
+    while ((rc = dds_take(reader_csp_cmd, samples, infos, 8, 8)) > 0)
     {
-        if (!infos[0].valid_data)
-            continue;
-
-        auto* msg = static_cast<zdl_msg_dds__CSPCommand*>(samples[0]);
-
-        // spdlog::info("========== 收到 CSP Command ==========");
-        // spdlog::info("timestamp: {}", msg->timestamp);
-
-        // std::string joints_str;
-        // for (int i = 0; i < 14; ++i)
-        // {
-        //     joints_str += fmt::format("{:.4f} ", msg->joint[i]);
-        // }
-        // spdlog::info("joints: [{}]", joints_str);
-
-        if (robot_)
+        for (int i = 0; i < rc; ++i)
         {
-            if(!csp_running_){
-                startCSPControl();
-                csp_running_ = true;
-                
+            if (!infos[i].valid_data)
+                continue;
+
+            auto* msg = static_cast<zdl_msg_dds__CSPCommand*>(samples[i]);
+
+            if (robot_)
+            {
+                if (!csp_running_)
+                {
+                    startCSPControl();
+                    csp_running_ = true;
+                }
+
+                interpolator_.receive(msg->timestamp, std::array<double,14>{
+                    msg->joint[0], msg->joint[1], msg->joint[2], msg->joint[3],
+                    msg->joint[4], msg->joint[5], msg->joint[6], msg->joint[7],
+                    msg->joint[8], msg->joint[9], msg->joint[10], msg->joint[11],
+                    msg->joint[12], msg->joint[13]
+                });
             }
-
-            interpolator_.receive(msg->timestamp, std::array<double,14>{
-                msg->joint[0], msg->joint[1], msg->joint[2], msg->joint[3],
-                msg->joint[4], msg->joint[5], msg->joint[6], msg->joint[7],
-                msg->joint[8], msg->joint[9], msg->joint[10], msg->joint[11],
-                msg->joint[12], msg->joint[13]
-            });
-            // auto mission = robot_->getRobotState().current_mission;
-            // spdlog::info("robot_mission(enum int): {}", static_cast<int>(mission));
-            // spdlog::info("插值器receive");
-
-            // 打印角度
-            // std::ostringstream oss;
-            // oss << "关节角度: [";
-            // for (int i = 0; i < 14; ++i) {
-            //     oss << msg->joint[i];
-            //     if (i != 13) oss << ", ";
-            // }
-            // oss << "]";
-            // spdlog::info(oss.str());
+            else
+            {
+                spdlog::error("robot 未初始化");
+            }
         }
-        else
-        {
-            spdlog::error("robot 未初始化");
-        }
-
-        // spdlog::info("=================================");
     }
 
     if (rc < 0)
@@ -1587,7 +1574,10 @@ void UiCmdServer::handle_csp_command()
         spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
     }
 
-    zdl_msg_dds__CSPCommand_free(samples[0], DDS_FREE_ALL);
+    for (int i = 0; i < 8; ++i)
+    {
+        zdl_msg_dds__CSPCommand_free(samples[i], DDS_FREE_ALL);
+    }
 }
 
 
