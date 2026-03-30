@@ -19,6 +19,9 @@
 #include "idl/stop_mission.h"
 #include "linear_interpolator.h"
 #include "idl/csp_command.h"
+#include <atomic>
+#include <thread>
+
 
 
 class UiCmdServer {
@@ -105,6 +108,7 @@ private:
     dds_entity_t writer_state_ = DDS_ENTITY_NIL;
 
     std::thread state_thread_;
+    std::thread csp_thread_;
     std::atomic<bool> running_{true};
 
 
@@ -112,7 +116,8 @@ private:
     LinearInterpolator interpolator_;
     dds_entity_t reader_csp_cmd = DDS_ENTITY_NIL;
     dds_entity_t topic_csp_cmd = DDS_ENTITY_NIL;
-    bool csp_running_ = false;
+    std::atomic<bool> csp_running_{false};
+
     std::vector<std::array<double, 14>> interpolated_positions_;
     std::mutex data_mutex_; 
 };

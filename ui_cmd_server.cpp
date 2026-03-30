@@ -29,6 +29,9 @@ UiCmdServer::~UiCmdServer() {
     if (state_thread_.joinable()) {
         state_thread_.join();
     }
+    if (csp_thread_.joinable()) {
+        csp_thread_.join();
+    }
 
     shutdownDds();
     spdlog::info("DDS实体已被销毁");
@@ -1549,10 +1552,15 @@ void UiCmdServer::handle_csp_command()
 
             if (robot_)
             {
-                if (!csp_running_)
+                if (!csp_running_.exchange(true))
                 {
-                    startCSPControl();
-                    csp_running_ = true;
+                    if (csp_thread_.joinable()) {
+                        csp_thread_.join();
+                    }
+                    csp_thread_ = std::thread([this]() {
+                        startCSPControl();
+                        csp_running_ = false;
+                    });
                 }
 
                 interpolator_.receive(msg->timestamp, std::array<double,14>{
