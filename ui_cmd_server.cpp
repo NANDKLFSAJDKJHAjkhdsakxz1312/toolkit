@@ -1001,8 +1001,8 @@ void UiCmdServer::handle_start() {
             dds_config.part_config._maximum = 2;
             dds_config.part_config._release = true; // DDS 负责释放缓冲区
             dds_config.part_config._buffer = dds_sequence_zdl_msg_dds__RobotParts_allocbuf(2);
-            dds_config.part_config._buffer[0] = zdl_msg_dds__kLeftArm;
-            dds_config.part_config._buffer[1] = zdl_msg_dds__kRightArm;
+            dds_config.part_config._buffer[0] = zdl_msg_dds__kRightArm;
+            dds_config.part_config._buffer[1] = zdl_msg_dds__kLeftArm;
             controller::StartConfig controller_config =
                 zdl::msg::dds_::ToControllerStartConfig(dds_config);
 
