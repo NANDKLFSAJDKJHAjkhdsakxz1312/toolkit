@@ -18,7 +18,7 @@ extern "C" {
 typedef struct zdl_msg_dds__CSPCommand
 {
   double timestamp;
-  double joint[14];
+  double joint[36];
 } zdl_msg_dds__CSPCommand;
 
 extern const dds_topic_descriptor_t zdl_msg_dds__CSPCommand_desc;

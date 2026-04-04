@@ -20,11 +20,73 @@ typedef enum zdl_msg_dds__CurrentArmMode
   zdl_msg_dds__kDualArm,
   zdl_msg_dds__kLeftArmOnly,
   zdl_msg_dds__kRightArmOnly,
-  zdl_msg_dds__kFoldedWaistOnly
+  zdl_msg_dds__kFoldedWaistOnly,
+  zdl_msg_dds__kLeftArmWithHand
 } zdl_msg_dds__CurrentArmMode;
 
 #define zdl_msg_dds__CurrentArmMode__alloc() \
 ((zdl_msg_dds__CurrentArmMode*) dds_alloc (sizeof (zdl_msg_dds__CurrentArmMode)));
+
+typedef enum zdl_msg_dds__ArmType
+{
+  zdl_msg_dds__kArmNotEnable,
+  zdl_msg_dds__k7Dof
+} zdl_msg_dds__ArmType;
+
+#define zdl_msg_dds__ArmType__alloc() \
+((zdl_msg_dds__ArmType*) dds_alloc (sizeof (zdl_msg_dds__ArmType)));
+
+typedef enum zdl_msg_dds__HandType
+{
+  zdl_msg_dds__kHandNotEnable,
+  zdl_msg_dds__kO7,
+  zdl_msg_dds__kGripper
+} zdl_msg_dds__HandType;
+
+#define zdl_msg_dds__HandType__alloc() \
+((zdl_msg_dds__HandType*) dds_alloc (sizeof (zdl_msg_dds__HandType)));
+
+typedef enum zdl_msg_dds__HeadType
+{
+  zdl_msg_dds__kHeadNotEnable,
+  zdl_msg_dds__kHeadEnable
+} zdl_msg_dds__HeadType;
+
+#define zdl_msg_dds__HeadType__alloc() \
+((zdl_msg_dds__HeadType*) dds_alloc (sizeof (zdl_msg_dds__HeadType)));
+
+typedef enum zdl_msg_dds__WaistType
+{
+  zdl_msg_dds__kWaistNotEnable,
+  zdl_msg_dds__kFoldWaist,
+  zdl_msg_dds__kLiftWaist
+} zdl_msg_dds__WaistType;
+
+#define zdl_msg_dds__WaistType__alloc() \
+((zdl_msg_dds__WaistType*) dds_alloc (sizeof (zdl_msg_dds__WaistType)));
+
+typedef enum zdl_msg_dds__WheelType
+{
+  zdl_msg_dds__kWheelNotEnable,
+  zdl_msg_dds__kWheelDoubleWheel
+} zdl_msg_dds__WheelType;
+
+#define zdl_msg_dds__WheelType__alloc() \
+((zdl_msg_dds__WheelType*) dds_alloc (sizeof (zdl_msg_dds__WheelType)));
+
+typedef enum zdl_msg_dds__RobotParts
+{
+  zdl_msg_dds__kLeftArm,
+  zdl_msg_dds__kRightArm,
+  zdl_msg_dds__kLeftHand,
+  zdl_msg_dds__kRightHand,
+  zdl_msg_dds__kHead,
+  zdl_msg_dds__kFoldedWaist,
+  zdl_msg_dds__kDoubleWheel
+} zdl_msg_dds__RobotParts;
+
+#define zdl_msg_dds__RobotParts__alloc() \
+((zdl_msg_dds__RobotParts*) dds_alloc (sizeof (zdl_msg_dds__RobotParts)));
 
 typedef struct zdl_msg_dds__Inertia
 {
@@ -59,20 +121,6 @@ extern const dds_topic_descriptor_t zdl_msg_dds__EndEffector_desc;
 #define zdl_msg_dds__EndEffector_free(d,o) \
 dds_sample_free ((d), &zdl_msg_dds__EndEffector_desc, (o))
 
-typedef enum zdl_msg_dds__RobotParts
-{
-  zdl_msg_dds__kLeftArm,
-  zdl_msg_dds__kRightArm,
-  zdl_msg_dds__kLeftHand,
-  zdl_msg_dds__kRightHand,
-  zdl_msg_dds__kHead,
-  zdl_msg_dds__kFoldedWaist,
-  zdl_msg_dds__kDoubleWheel
-} zdl_msg_dds__RobotParts;
-
-#define zdl_msg_dds__RobotParts__alloc() \
-((zdl_msg_dds__RobotParts*) dds_alloc (sizeof (zdl_msg_dds__RobotParts)));
-
 #ifndef DDS_SEQUENCE_ZDL_MSG_DDS__ROBOTPARTS_DEFINED
 #define DDS_SEQUENCE_ZDL_MSG_DDS__ROBOTPARTS_DEFINED
 typedef struct dds_sequence_zdl_msg_dds__RobotParts
@@ -92,11 +140,22 @@ typedef struct dds_sequence_zdl_msg_dds__RobotParts
 
 typedef struct zdl_msg_dds__StartConfig
 {
+  dds_sequence_zdl_msg_dds__RobotParts part_config;
+  char * device_yaml_path;
+  char * master_yaml_path;
+  char * urdf_path;
   zdl_msg_dds__CurrentArmMode arm_mode;
   double distance_between_arm;
+  bool gravity_compensation_enabled;
   struct zdl_msg_dds__EndEffector left_end_effector;
   struct zdl_msg_dds__EndEffector right_end_effector;
-  dds_sequence_zdl_msg_dds__RobotParts part_config;
+  zdl_msg_dds__ArmType left_arm_type;
+  zdl_msg_dds__ArmType right_arm_type;
+  zdl_msg_dds__HandType left_hand_type;
+  zdl_msg_dds__HandType right_hand_type;
+  zdl_msg_dds__HeadType head_type;
+  zdl_msg_dds__WaistType waist_type;
+  zdl_msg_dds__WheelType wheel_type;
 } zdl_msg_dds__StartConfig;
 
 extern const dds_topic_descriptor_t zdl_msg_dds__StartConfig_desc;

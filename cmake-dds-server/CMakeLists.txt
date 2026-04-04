@@ -5,15 +5,14 @@ project(dds_ui_cmd_server VERSION 1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(ZDL_SOFTWARE_DIR "/home/root/software/zdl-wanghuo-software")
-set(ZDL_LIB_DIR "/home/root/software/zdl-wanghuo-lib")
+
 
 # 源文件
 set(SOURCES
     ../main.cpp
     ../ui_cmd_server.cpp
     ../idl/start_task.c
-    ../utils/struct_init.cpp
+ 
     ../idl/stop_task.c
     ../idl/enable.c
     ../idl/disable.c
@@ -36,10 +35,12 @@ set(CMAKE_PREFIX_PATH
     "/home/root/software/spdlog1.16.0_install"
     "/home/root/software/boost_1.85.0_install"
     "/home/root/software/eigen3.4.0_install"
+    "/home/root/software/zdl-wanghuo-lib"
+    "/home/root/software/zdl-wanghuo-software"
 )
 
 # ZdlController
-set(ZdlController_DIR "${ZDL_SOFTWARE_DIR}/lib/cmake/ZdlController")
+
 
 # 找 包
 find_package(zdl_controller REQUIRED)
@@ -53,7 +54,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # ✅ 正确的 include（关键修复）
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${ZDL_SOFTWARE_DIR}/lib/include
+    /home/root/software/zdl-wanghuo-lib/include
     ../include
    
 )
@@ -61,7 +62,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # 链接库
 target_link_libraries(${PROJECT_NAME}
     zdl_controller::zdl_controller
-
+    
     Eigen3::Eigen
     CycloneDDS::ddsc
     spdlog::spdlog

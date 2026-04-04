@@ -1,148 +1,182 @@
 module zdl {
   module msg {
     module dds_ {
-      module state{
-      
+      module state {
+
         enum RobotError
-            {
-                OK,
-                kEmergencyStop,
-                kPoseOverLimit,
-                kJointOverTemp,
-                kEncoderFault,
-                kCollisionDetected,
-                kCommunicationLost 
-            };
-
-            enum CurrentMode
-            {
-                kNotStart,
-                kNotEnable,
-                kCSP,
-                kCST,
-                kOther
-            };
-
-            enum CurrentMission
-            {
-                kUnavailable,
-                kIdle,
-                kHoming,
-                kJog,
-                kReturnToZero,
-                kDrag,
-                kJointImpedance,
-                kCartImpedance,
-                kUserCSP,
-                kUserCST,
-                kFoldedWaistControl
-            };
-
-            enum CurrentArmMode
-            {
-                kDualArm,
-                kLeftArmOnly,
-                kRightArmOnly,
-                kFoldedWaistOnly,
-                kLeftArmWithHand
-            };
-
-            struct JointState7
-            {
-                unsigned short status_word[7];
-                unsigned short error_code[7];
-                short mode_of_operation[7];
-                double q[7];
-                double q_d[7];
-                double dq[7];
-                double tau_J[7];
-            };
-
-            struct JointState6
-            {
-                unsigned short status_word[6];
-                unsigned short error_code[6];
-                short mode_of_operation[6];
-                double q[6];
-                double q_d[6];
-                double dq[6];
-                double tau_J[6];
-            };
-
-            struct JointState2
-            {
-                unsigned short status_word[2];
-                unsigned short error_code[2];
-                short mode_of_operation[2];
-                double q[2];
-                double q_d[2];
-                double dq[2];
-                double tau_J[2];
-            };
-
-            struct ArmState
-            {
-                JointState7 joint_state;
-
-                double dq_d[7];
-                double tau_Js[7];
-                double tau_J_d[7];
-
-                double O_T_EE[16];
-                double O_T_EE_d[16];
-
-                double m_total;
-                double I_total[9];
-                double F_x_Ctotal[3];
-
-                double joint_k_gains[7];
-                double joint_d_gains[7];
-
-                double stiffness[6];
-                double damping[6];
-            };
-
-            struct FoldedWaist
-            {
-                JointState6 joint_state;
-                double q_e[6];
-            };
-
-            struct HandState
-            {
-                JointState7 joint_state;
-            };
-
-            struct HeadState
-            {
-                JointState2 joint_state;
-            };
-
-            struct RobotState
-            {
-                ArmState left_arm;
-                ArmState right_arm;
-
-                HandState left_hand;
-                HandState right_hand;
-
-                FoldedWaist folded_waist;
-
-                HeadState head;
-
-                RobotError current_errors;
-
-                CurrentMode current_mode;
-                CurrentMission current_mission;
-                CurrentArmMode current_arm_mode;
-
-                double time; // Duration 这里用 double 表示秒数
-            };
+        {
+          OK,
+          kEmergencyStop,
+          kPoseOverLimit,
+          kJointOverTemp,
+          kEncoderFault,
+          kCollisionDetected,
+          kCommunicationLost
         };
+
+        enum CurrentMode
+        {
+          kNotStart,
+          kNotEnable,
+          kCSP,
+          kCST,
+          kOther
+        };
+
+        enum CurrentMission
+        {
+          kUnavailable,
+          kIdle,
+          kHoming,
+          kJog,
+          kReturnToZero,
+          kDrag,
+          kJointImpedance,
+          kCartImpedance,
+          kUserCSP,
+          kUserCST,
+          kFoldedWaistControl
+        };
+
+        enum CurrentArmMode
+        {
+          kDualArm,
+          kLeftArmOnly,
+          kRightArmOnly,
+          kFoldedWaistOnly,
+          kLeftArmWithHand
+        };
+
+        // =========================
+        // JointState 模板展开
+        // =========================
+
+        struct JointState7
+        {
+          unsigned short status_word[7];
+          unsigned short error_code[7];
+          short mode_of_operation[7];
+
+          double q[7];
+          double q_d[7];
+          double q_e[7];
+
+          double dq[7];
+          double tau_J[7];
+        };
+
+        struct JointState4
+        {
+          unsigned short status_word[4];
+          unsigned short error_code[4];
+          short mode_of_operation[4];
+
+          double q[4];
+          double q_d[4];
+          double q_e[4];
+
+          double dq[4];
+          double tau_J[4];
+        };
+
+        struct JointState2
+        {
+          unsigned short status_word[2];
+          unsigned short error_code[2];
+          short mode_of_operation[2];
+
+          double q[2];
+          double q_d[2];
+          double q_e[2];
+
+          double dq[2];
+          double tau_J[2];
+        };
+
+        // =========================
+        // ArmState
+        // =========================
+        struct ArmState
+        {
+          JointState7 joint_state;
+
+          double dq_d[7];
+          double tau_Js[7];
+          double tau_J_d[7];
+
+          double O_T_EE[16];
+          double O_T_EE_d[16];
+
+          double m_total;
+          double I_total[9];
+          double F_x_Ctotal[3];
+
+          double joint_k_gains[7];
+          double joint_d_gains[7];
+
+          double stiffness[6];
+          double damping[6];
+        };
+
+        // =========================
+        // WaistState (folded_waist) 4 DOF
+        // =========================
+        struct WaistState
+        {
+          JointState4 joint_state;
+        };
+
+        // =========================
+        // HandState
+        // =========================
+        struct HandState
+        {
+          JointState7 joint_state;
+        };
+
+        // =========================
+        // HeadState
+        // =========================
+        struct HeadState
+        {
+          JointState2 joint_state;
+        };
+
+        // =========================
+        // WheelState
+        // =========================
+        struct WheelState
+        {
+          JointState2 joint_state;
+        };
+
+        // =========================
+        // RobotState
+        // =========================
+        struct RobotState
+        {
+          ArmState left_arm;
+          ArmState right_arm;
+
+          HandState left_hand;
+          HandState right_hand;
+
+          WaistState folded_waist;
+
+          WheelState wheel;
+
+          HeadState head;
+
+          RobotError current_errors;
+
+          CurrentMode current_mode;
+          CurrentMission current_mission;
+          CurrentArmMode current_arm_mode;
+
+          double time;
+        };
+
+      };
     };
   };
 };
-
-
-
-

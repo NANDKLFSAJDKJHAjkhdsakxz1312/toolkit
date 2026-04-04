@@ -7,7 +7,7 @@
 class LinearInterpolator
 {
 public:
-    static constexpr int DOF = 14;
+    static constexpr int DOF = 36;
 
     // 👉 DDS接收接口（60Hz）
     void receive(double timestamp, const std::array<double, DOF>& q);

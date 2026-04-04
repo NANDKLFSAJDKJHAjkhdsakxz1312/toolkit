@@ -80,7 +80,7 @@ bool UiCmdServer::initDds() {
       dds_lset_publication_matched(listener_, UiCmdServer::on_publication_matched);
 
       reader_start = dds_create_reader(subscriber_, topic_start, qos_start, listener_);
-      writer_start_reply = dds_create_writer(publisher_,topic_start,qos_start,nullptr)
+    
       dds_delete_qos(qos_start);
       
 
@@ -514,12 +514,12 @@ void UiCmdServer::handle_data(dds_entity_t reader) {
     {
         handle_jog_command();
     }
-    else if (reader == reader_waist_target){
-        handle_waist_target();
-    }
-    else if (reader == reader_wheel_stop){
-        handle_wheel_stop();
-    }
+    // else if (reader == reader_waist_target){
+    //     handle_waist_target();
+    // }
+    // else if (reader == reader_wheel_stop){
+    //     handle_wheel_stop();
+    // }
     else if(reader == reader_e_stop){
         handle_e_stop();
     }
@@ -967,9 +967,9 @@ void UiCmdServer::handle_start()
         
 
         // 3) yaml / urdf 路径
-        config.device_yaml_path = "../config/config_data_collection_upper_device.yaml";
-    config.master_yaml_path = "../config/config_data_collection_upper_master.yaml";
-    config.urdf_path = "../data/duo_arm.urdf";
+        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_device.yaml";
+    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_master.yaml";
+    config.urdf_path = "/home/root/workspace/zdl-controller-toolkit/data/duo_arm.urdf";
 
         
     config.left_arm_direction = {true, true, true, true, true, true, true};
@@ -981,7 +981,7 @@ void UiCmdServer::handle_start()
         config.left_hand_type = controller::HandType::kO7;
         config.right_hand_type = controller::HandType::kO7;
         config.head_type = controller::HeadType::kEnable;
-        config.waist_type = controller::WaistType::kListWaist;
+        config.waist_type = controller::WaistType::kLiftWaist;
         config.wheel_type = controller::WheelType::kDoubleWheel;
 
         // 6) part_config 解析
@@ -992,8 +992,9 @@ void UiCmdServer::handle_start()
         config.part_config.push_back(controller::RobotParts::kLeftArm);
         config.part_config.push_back(controller::RobotParts::kLeftHand);
         config.part_config.push_back(controller::RobotParts::kHead);
-        config.part_config.push_back(controller::RobotParts::kLiftWaist);
+        config.part_config.push_back(controller::RobotParts::kFoldedWaist);
         config.part_config.push_back(controller::RobotParts::kDoubleWheel);
+    
 
         // 7) 调用 robot_->connect
         if (!robot_) {
@@ -1104,7 +1105,7 @@ void UiCmdServer::handle_enable()
                 std::lock_guard<std::mutex> lock(robot_mutex_);
 
                 // 这里调用你的机器人控制接口
-                robot_->enable(zdl::msg::dds_::ToControllerRequestMode(msg->request_mode));
+                robot_->enable(controller::RequestMode::kCSP);
 
                 spdlog::info("robot enable 执行完成");
                 
@@ -1320,90 +1321,90 @@ void UiCmdServer::handle_jog_command()
 
 
 
-void UiCmdServer::handle_waist_target(){
-    spdlog::info("waist_target received");
+// void UiCmdServer::handle_waist_target(){
+//     spdlog::info("waist_target received");
 
-    void* samples[1];
-    dds_sample_info_t infos[1];
+//     void* samples[1];
+//     dds_sample_info_t infos[1];
 
-    samples[0] = zdl_msg_dds__WaistTarget__alloc();
+//     samples[0] = zdl_msg_dds__WaistTarget__alloc();
 
-    dds_return_t rc;
+//     dds_return_t rc;
 
-    while ((rc = dds_take(reader_waist_target, samples, infos, 1, 1)) > 0)
-    {
-        if (!infos[0].valid_data)
-            continue;
+//     while ((rc = dds_take(reader_waist_target, samples, infos, 1, 1)) > 0)
+//     {
+//         if (!infos[0].valid_data)
+//             continue;
 
-        auto* msg = static_cast<zdl_msg_dds__WaistTarget*>(samples[0]);
+//         auto* msg = static_cast<zdl_msg_dds__WaistTarget*>(samples[0]);
 
-        spdlog::info("========== 收到 Return_zero 指令 ==========");
-        spdlog::info("request_id={}", msg->request_id);
+//         spdlog::info("========== 收到 Return_zero 指令 ==========");
+//         spdlog::info("request_id={}", msg->request_id);
 
-        if (robot_)
-        {
-            std::lock_guard<std::mutex> lock(robot_mutex_);
-            robot_->setFoldedWaistTarget(msg->target);
-        }
-        else
-        {
-            spdlog::error("robot 未初始化");
-        }
+//         if (robot_)
+//         {
+//             std::lock_guard<std::mutex> lock(robot_mutex_);
+//             robot_->setFoldedWaistTarget(msg->target);
+//         }
+//         else
+//         {
+//             spdlog::error("robot 未初始化");
+//         }
 
-        spdlog::info("=================================");
-    }
+//         spdlog::info("=================================");
+//     }
 
-    if (rc < 0)
-    {
-        spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
-    }
+//     if (rc < 0)
+//     {
+//         spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
+//     }
 
-    zdl_msg_dds__WaistTarget_free(samples[0], DDS_FREE_ALL);
-}
-
-
+//     zdl_msg_dds__WaistTarget_free(samples[0], DDS_FREE_ALL);
+// }
 
 
-void UiCmdServer::handle_wheel_stop(){
-    spdlog::info("wheel_stop received");
 
-    void* samples[1];
-    dds_sample_info_t infos[1];
 
-    samples[0] = zdl_msg_dds__WheelStop__alloc();
+// void UiCmdServer::handle_wheel_stop(){
+//     spdlog::info("wheel_stop received");
 
-    dds_return_t rc;
+//     void* samples[1];
+//     dds_sample_info_t infos[1];
 
-    while ((rc = dds_take(reader_wheel_stop, samples, infos, 1, 1)) > 0)
-    {
-        if (!infos[0].valid_data)
-            continue;
+//     samples[0] = zdl_msg_dds__WheelStop__alloc();
 
-        auto* msg = static_cast<zdl_msg_dds__WheelStop*>(samples[0]);
+//     dds_return_t rc;
 
-        spdlog::info("========== 收到 Wheel Stop 指令 ==========");
-        spdlog::info("request_id={}", msg->request_id);
+//     while ((rc = dds_take(reader_wheel_stop, samples, infos, 1, 1)) > 0)
+//     {
+//         if (!infos[0].valid_data)
+//             continue;
 
-        if (robot_)
-        {
-            std::lock_guard<std::mutex> lock(robot_mutex_);
-            robot_->setWheelTarget(0.0,0.0);
-        }
-        else
-        {
-            spdlog::error("robot 未初始化");
-        }
+//         auto* msg = static_cast<zdl_msg_dds__WheelStop*>(samples[0]);
 
-        spdlog::info("=================================");
-    }
+//         spdlog::info("========== 收到 Wheel Stop 指令 ==========");
+//         spdlog::info("request_id={}", msg->request_id);
 
-    if (rc < 0)
-    {
-        spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
-    }
+//         if (robot_)
+//         {
+//             std::lock_guard<std::mutex> lock(robot_mutex_);
+//             robot_->setWheelTarget(0.0,0.0);
+//         }
+//         else
+//         {
+//             spdlog::error("robot 未初始化");
+//         }
 
-    zdl_msg_dds__WheelStop_free(samples[0], DDS_FREE_ALL);
-}
+//         spdlog::info("=================================");
+//     }
+
+//     if (rc < 0)
+//     {
+//         spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
+//     }
+
+//     zdl_msg_dds__WheelStop_free(samples[0], DDS_FREE_ALL);
+// }
 
 
 
@@ -1540,22 +1541,23 @@ void UiCmdServer::handle_csp_command()
 
             if (robot_)
             {
-                if (!csp_running_.exchange(true))
+                if (!csp_running_)
                 {
-                    if (csp_thread_.joinable()) {
-                        csp_thread_.join();
-                    }
-                    csp_thread_ = std::thread([this]() {
-                        startCSPControl();
-                        csp_running_ = false;
-                    });
+                    startCSPControl();
+                    csp_running_ = true;
                 }
 
-                interpolator_.receive(msg->timestamp, std::array<double,14>{
-                    msg->joint[0], msg->joint[1], msg->joint[2], msg->joint[3],
-                    msg->joint[4], msg->joint[5], msg->joint[6], msg->joint[7],
-                    msg->joint[8], msg->joint[9], msg->joint[10], msg->joint[11],
-                    msg->joint[12], msg->joint[13]
+
+                interpolator_.receive(msg->timestamp, std::array<double,36>{
+                    msg->joint[0],  msg->joint[1],  msg->joint[2],  msg->joint[3],
+                    msg->joint[4],  msg->joint[5],  msg->joint[6],  msg->joint[7],
+                    msg->joint[8],  msg->joint[9],  msg->joint[10], msg->joint[11],
+                    msg->joint[12], msg->joint[13], msg->joint[14], msg->joint[15],
+                    msg->joint[16], msg->joint[17], msg->joint[18], msg->joint[19],
+                    msg->joint[20], msg->joint[21], msg->joint[22], msg->joint[23],
+                    msg->joint[24], msg->joint[25], msg->joint[26], msg->joint[27],
+                    msg->joint[28], msg->joint[29], msg->joint[30], msg->joint[31],
+                    msg->joint[32], msg->joint[33], msg->joint[34], msg->joint[35]
                 });
             }
             else
@@ -1588,12 +1590,15 @@ void UiCmdServer::startCSPControl()
     {
         if (!cmd.isInitialized())
         {
-        cmd.enableRightHand();
-        cmd.enableLeftHand();
         cmd.enableRightArm();
-        cmd.enableLeftArm();
-        cmd.enableWaistPP();
-        cmd.enableWheel();
+        // cmd.enableRightHand();
+        // cmd.enableLeftArm();
+        // cmd.enableLeftHand();
+        
+   
+        
+        // cmd.enableWaistPP();
+        // cmd.enableWheel();
         cmd.setInitialized();
         }
         std::array<double, 36> q_interp;
@@ -1602,7 +1607,7 @@ void UiCmdServer::startCSPControl()
         {
             std::lock_guard<std::mutex> lock(data_mutex_);
             interpolated_positions_.push_back(q_interp);
-                spdlog::info("存储了");
+                // spdlog::info("存储了");
         }
         if (!ok)
         {
@@ -1614,73 +1619,84 @@ void UiCmdServer::startCSPControl()
                 cmd.left_arm.q_d[i]  = s.left_arm.q[i];
                 cmd.right_hand.q_d[i] = s.right_hand.q[i];
                 cmd.left_hand.q_d[i] = s.left_hand.q[i];
-                cmd.waist.q_d[i] = s.waist.q[i];
-                cmd.wheel.q_d[i] = s.wheel.q[i];
+                
             }
-            
-            
+            cmd.waist.q_d[0] = s.folded_waist.q[0];
+            cmd.wheel.dq_d = {0.0, 0.0};
+            return;
         }
 
-        for (int i = 0; i < 7; ++i)
-        {
+        cmd.right_arm.q_d[0] = q_interp[0];
+        cmd.right_arm.q_d[1] = q_interp[1];
+        cmd.right_arm.q_d[2] = q_interp[2];
+        cmd.right_arm.q_d[3] = q_interp[3];
+        cmd.right_arm.q_d[4] = q_interp[4];
+        cmd.right_arm.q_d[5] = q_interp[5];
+        cmd.right_arm.q_d[6] = q_interp[6];
 
-            // spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
-            double l = q_interp[i];
-            double r = q_interp[i + 7];
-            //todo
-            
-        }
-        cmd.right_hand = target;
+        cmd.right_hand.q_d[0] = q_interp[7];
+        cmd.right_hand.q_d[1] = q_interp[8];
+        cmd.right_hand.q_d[2] = q_interp[9];
+        cmd.right_hand.q_d[3] = q_interp[10];
+        cmd.right_hand.q_d[4] = q_interp[11];
+        cmd.right_hand.q_d[5] = q_interp[12];
+        cmd.right_hand.q_d[6] = q_interp[13];
+
+        cmd.right_hand.dq_d[0] = 100.0;
+        cmd.right_hand.dq_d[1] = 100.0;
+        cmd.right_hand.dq_d[2] = 100.0;
+        cmd.right_hand.dq_d[3] = 100.0;
+        cmd.right_hand.dq_d[4] = 100.0;
+        cmd.right_hand.dq_d[5] = 100.0;
+        cmd.right_hand.dq_d[6] = 100.0;
+
+        cmd.right_hand.tau_d[0] = 100.0;
+        cmd.right_hand.tau_d[1] = 100.0;
+        cmd.right_hand.tau_d[2] = 100.0;
+        cmd.right_hand.tau_d[3] = 100.0;
+        cmd.right_hand.tau_d[4] = 100.0;
+        cmd.right_hand.tau_d[5] = 100.0;
+        cmd.right_hand.tau_d[6] = 100.0;
+
+        cmd.left_arm.q_d[0] = q_interp[14];
+        cmd.left_arm.q_d[1] = q_interp[15];
+        cmd.left_arm.q_d[2] = q_interp[16];
+        cmd.left_arm.q_d[3] = q_interp[17];
+        cmd.left_arm.q_d[4] = q_interp[18];
+        cmd.left_arm.q_d[5] = q_interp[19];
+        cmd.left_arm.q_d[6] = q_interp[20];
+        cmd.left_hand.q_d[0] = q_interp[21];
+        cmd.left_hand.q_d[1] = q_interp[22];
+        cmd.left_hand.q_d[2] = q_interp[23];
+        cmd.left_hand.q_d[3] = q_interp[24];
+        cmd.left_hand.q_d[4] = q_interp[25];
+        cmd.left_hand.q_d[5] = q_interp[26];
+        cmd.left_hand.q_d[6] = q_interp[27];
+
+        cmd.left_hand.dq_d[0] = 100.0;
+        cmd.left_hand.dq_d[1] = 100.0;
+        cmd.left_hand.dq_d[2] = 100.0;
+        cmd.left_hand.dq_d[3] = 100.0;
+        cmd.left_hand.dq_d[4] = 100.0;
+        cmd.left_hand.dq_d[5] = 100.0;
+        cmd.left_hand.dq_d[6] = 100.0;
+
+        cmd.left_hand.tau_d[0] = 100.0;
+        cmd.left_hand.tau_d[1] = 100.0;
+        cmd.left_hand.tau_d[2] = 100.0;
+        cmd.left_hand.tau_d[3] = 100.0;
+        cmd.left_hand.tau_d[4] = 100.0;
+        cmd.left_hand.tau_d[5] = 100.0;
+        cmd.left_hand.tau_d[6] = 100.0;
+        
+        cmd.waist.q_d[0] = q_interp[30];
+
+        cmd.wheel.dq_d = {q_interp[34],q_interp[35]};
         
     };
-    auto motion_callback =
-        [this](const controller::RobotState& s,
-               controller::Duration time) -> controller::JointPositions
-    {
-        // spdlog::info("motioncallback loop");
-        controller::ControlCommand q_cmd;
+    
 
-        std::array<double, 14> q_interp;
-
-        bool ok = interpolator_.get(q_interp);
-        if (ok)
-        {
-            std::lock_guard<std::mutex> lock(data_mutex_);
-            interpolated_positions_.push_back(q_interp);
-            // spdlog::info("存储了");
-        }
-        if (!ok)
-        {
-            spdlog::warn("插值器无数据，返回当前关节位置");
-            controller::ControlCommand cmd;
-            for (int i = 0; i < 7; ++i)
-            {
-                cmd.right_arm.q_d[i] = s.right_arm.q[i];
-                cmd.left_arm.q_d[i]  = s.left_arm.q[i];
-            }
-            return controller::JointPositions(cmd);
-            
-        }
-
-        for (int i = 0; i < 7; ++i)
-        {
-
-            // spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
-            double l = q_interp[i] * 2 * M_PI / 360.0;
-            double r = q_interp[i + 7] * 2 * M_PI / 360.0;
-
-            q_cmd.right_arm.q_d[i] =
-                toolkit::kJointDirectionFlag[i] ? r : -r;
-
-            q_cmd.left_arm.q_d[i] =
-                toolkit::kJointDirectionFlag[i + 7] ? l : -l;
-        }
-
-        return controller::JointPositions(q_cmd);
-     
-    };
-
-    robot_->runCycleJointMotion(motion_callback); 
+    robot_->runCycleJointMotion(cmd_callback); 
     spdlog::info("after runCycleJointMotion");
 }
 
@@ -1736,7 +1752,7 @@ void UiCmdServer::handle_stop_mission(){
         if (robot_)
         {
             std::lock_guard<std::mutex> lock(robot_mutex_);
-            robot_->stopCurrentMisiion();
+            robot_->stopCurrentMission();
         }
         else
         {

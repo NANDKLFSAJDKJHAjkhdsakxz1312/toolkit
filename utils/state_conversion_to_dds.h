@@ -4,7 +4,7 @@
 #include <cstring>
 #include <array>
 
-#include "ZdlController/controller_api.h"
+#include "zdl_controller/controller_api.h"
 #include "../idl/robot_state.h"
 
 // ================= 工具函数 =================
@@ -57,15 +57,18 @@ inline void ToDdsJointState2(
     copyArray(src.tau_J, dst.tau_J);
 }
 
-inline void ToDdsJointState6(
-    const controller::RobotState::JointState<6>& src,
-    zdl_msg_dds__state_JointState6& dst)
+inline void ToDdsJointState4(
+    const controller::RobotState::JointState<4>& src,
+    zdl_msg_dds__state_JointState4& dst)
 {
     copyArray(src.status_word, dst.status_word);
     copyArray(src.error_code, dst.error_code);
     copyArrayCast(src.mode_of_operation, dst.mode_of_operation);
+
     copyArray(src.q, dst.q);
     copyArray(src.q_d, dst.q_d);
+    copyArray(src.q_e, dst.q_e);
+
     copyArray(src.dq, dst.dq);
     copyArray(src.tau_J, dst.tau_J);
 }
@@ -96,12 +99,11 @@ inline void ToDdsArmState(
 }
 
 // ================= 其他部件 =================
-inline void ToDdsFoldedWaist(
-    const controller::RobotState::FoldedWaist& src,
-    zdl_msg_dds__state_FoldedWaist& dst)
+inline void ToDdsWaistState(
+    const controller::RobotState::WaistState& src,
+    zdl_msg_dds__state_WaistState& dst)
 {
-    ToDdsJointState6(src, dst.joint_state);
-    copyArray(src.q_e, dst.q_e);
+    ToDdsJointState4(src, dst.joint_state);
 }
 
 inline void ToDdsHandState(
@@ -109,6 +111,13 @@ inline void ToDdsHandState(
     zdl_msg_dds__state_HandState& dst)
 {
     ToDdsJointState7(src, dst.joint_state);
+}
+
+inline void ToDdsWheelState(
+    const controller::RobotState::WheelState& src,
+    zdl_msg_dds__state_WheelState& dst)
+{
+    ToDdsJointState2(src, dst.joint_state);
 }
 
 inline void ToDdsHeadState(
@@ -129,9 +138,10 @@ inline void ToDdsRobotState(
     ToDdsHandState(src.left_hand, dst.left_hand);
     ToDdsHandState(src.right_hand, dst.right_hand);
 
-    ToDdsFoldedWaist(src.folded_waist, dst.folded_waist);
+    ToDdsWaistState(src.folded_waist, dst.folded_waist);
 
     ToDdsHeadState(src.head, dst.head);
+    ToDdsWheelState(src.wheel,dst.wheel);
 
     // enum（C enum）
     dst.current_errors =
@@ -149,3 +159,8 @@ inline void ToDdsRobotState(
     // time
     dst.time = src.time.toSec();
 }
+
+
+
+
+

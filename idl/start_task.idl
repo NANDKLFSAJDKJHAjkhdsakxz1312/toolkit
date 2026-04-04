@@ -1,16 +1,59 @@
 module zdl {
   module msg {
     module dds_ {
+
       enum CurrentArmMode {
         kDualArm,
         kLeftArmOnly,
         kRightArmOnly,
-        kFoldedWaistOnly
+        kFoldedWaistOnly,
+        kLeftArmWithHand
+      };
+
+      enum ArmType {
+        kArmNotEnable,
+        k7Dof
+      };
+
+      enum HandType {
+        kHandNotEnable,
+        kO7,
+        kGripper
+      };
+
+      enum HeadType {
+        kHeadNotEnable,
+        kHeadEnable
+      };
+
+      enum WaistType {
+        kWaistNotEnable,
+        kFoldWaist,
+        kLiftWaist
+      };
+
+      enum WheelType {
+        kWheelNotEnable,
+        kWheelDoubleWheel
+      };
+
+      enum RobotParts {
+        kLeftArm,
+        kRightArm,
+        kLeftHand,
+        kRightHand,
+        kHead,
+        kFoldedWaist,
+        kDoubleWheel
       };
 
       struct Inertia {
-        double ixx; double iyy; double izz;
-        double ixy; double ixz; double iyz;
+        double ixx;
+        double iyy;
+        double izz;
+        double ixy;
+        double ixz;
+        double iyz;
       };
 
       struct EndEffector {
@@ -19,28 +62,34 @@ module zdl {
         Inertia inertia;
       };
 
-      enum RobotParts {
-          kLeftArm,
-          kRightArm,
-          kLeftHand,
-          kRightHand,
-          kHead,
-          kFoldedWaist,
-          kDoubleWheel
-      };
-
       struct StartConfig {
-          CurrentArmMode arm_mode;
-          double distance_between_arm;
-          EndEffector left_end_effector;
-          EndEffector right_end_effector;
-          sequence<RobotParts> part_config;
+        sequence<RobotParts> part_config;
+
+        string device_yaml_path;
+        string master_yaml_path;
+        string urdf_path;
+
+        CurrentArmMode arm_mode;
+        double distance_between_arm;
+        boolean gravity_compensation_enabled;
+
+        EndEffector left_end_effector;
+        EndEffector right_end_effector;
+
+        ArmType left_arm_type;
+        ArmType right_arm_type;
+        HandType left_hand_type;
+        HandType right_hand_type;
+        HeadType head_type;
+        WaistType waist_type;
+        WheelType wheel_type;
       };
 
       struct StartRequest {
-        uint32 request_id; // CycloneDDS C++ 对应 uint32_t
+        uint32 request_id;
         StartConfig config;
       };
+
     };
   };
 };

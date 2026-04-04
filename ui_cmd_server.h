@@ -1,10 +1,8 @@
 #include "dds/dds.h"
 #include "idl/start_task.h"
 #include <spdlog/spdlog.h>
-#include "utils/struct_init.h"
 
 #include "zdl_controller/controller_api.h"
-#include "zdl_controller/robot_state.h"
 #include "idl/stop_task.h"
 #include "idl/enable.h"
 #include "idl/disable.h"
@@ -21,8 +19,9 @@
 #include "idl/stop_mission.h"
 #include "linear_interpolator.h"
 #include "idl/csp_command.h"
-#include <atomic>
 #include <thread>
+#include <atomic>
+
 
 
 
@@ -63,9 +62,9 @@ public:
     void handle_set_zero_position();
     void handle_return_zero();
     void handle_jog_command();
-    void handle_waist_target();
+    // void handle_waist_target();
     void publishRobotState();
-    void handle_wheel_stop();
+    // void handle_wheel_stop();
     void handle_e_stop();
     void handle_csp_command();
     void startCSPControl();
@@ -78,66 +77,38 @@ private:
     std::unique_ptr<controller::ControllerInterface> robot_;
     dds_entity_t participant_ = DDS_ENTITY_NIL;
     dds_entity_t subscriber_ = DDS_ENTITY_NIL;
-    dds_entity_t publisher_ = DDS_ENTITY_NIL;
-    
     dds_entity_t topic_start = DDS_ENTITY_NIL;
     dds_entity_t reader_start = DDS_ENTITY_NIL;
-    dds_entity_t writer_start_reply = DDS_ENTITY_NIL;
-
     dds_entity_t topic_stop = DDS_ENTITY_NIL;
     dds_entity_t reader_stop = DDS_ENTITY_NIL;
-    dds_entity_t writer_stop_reply = DDS_ENTITY_NIL;
-
     dds_entity_t topic_enable = DDS_ENTITY_NIL;
     dds_entity_t reader_enable = DDS_ENTITY_NIL;
-    dds_entity_t writer_enable_reply = DDS_ENTITY_NIL;
-
-
     dds_entity_t topic_disable = DDS_ENTITY_NIL;
     dds_entity_t reader_disable = DDS_ENTITY_NIL;
-    dds_entity_t writer_disable_reply = DDS_ENTITY_NIL;
-    
     dds_entity_t topic_set_zero_position = DDS_ENTITY_NIL;
     dds_entity_t reader_set_zero_position = DDS_ENTITY_NIL;
-    dds_entity_t writer_set_zero_position = DDS_ENTITY_NIL;
-
     dds_entity_t topic_return_zero = DDS_ENTITY_NIL;
     dds_entity_t reader_return_zero = DDS_ENTITY_NIL;
-    dds_entity_t writer_return_zero = DDS_ENTITY_NIL;
-
     dds_entity_t topic_jog_command = DDS_ENTITY_NIL;
     dds_entity_t reader_jog_command = DDS_ENTITY_NIL;
-    
-    
- 
     dds_entity_t topic_waist_target = DDS_ENTITY_NIL;
     dds_entity_t reader_waist_target = DDS_ENTITY_NIL;
-    dds_entity_t writer_waist_target = DDS_ENTITY_NIL;
-
     dds_entity_t topic_wheel_stop = DDS_ENTITY_NIL;
     dds_entity_t reader_wheel_stop = DDS_ENTITY_NIL;
-    dds_entity_t writer_wheel_stop = DDS_ENTITY_NIL;
-
     dds_entity_t topic_e_stop = DDS_ENTITY_NIL;
     dds_entity_t reader_e_stop = DDS_ENTITY_NIL;
-
     dds_entity_t topic_stop_mission = DDS_ENTITY_NIL;
     dds_entity_t reader_stop_mission = DDS_ENTITY_NIL;
-    dds_entity_t writer_stop_mission = DDS_ENTITY_NIL;
-
-    
-
-    dds_listener_t* listener_ = nullptr;
+    dds_listener_t* listener_;
     std::mutex robot_mutex_;
 
 
 
-    dds_entity_t publisher_ = DDS_ENTITY_NIL;
-    dds_entity_t topic_state_ = DDS_ENTITY_NIL;
-    dds_entity_t writer_state_ = DDS_ENTITY_NIL;
+    dds_entity_t publisher_;
+    dds_entity_t topic_state_;
+    dds_entity_t writer_state_;
 
     std::thread state_thread_;
-    std::thread csp_thread_;
     std::atomic<bool> running_{true};
 
 
@@ -145,9 +116,11 @@ private:
     LinearInterpolator interpolator_;
     dds_entity_t reader_csp_cmd = DDS_ENTITY_NIL;
     dds_entity_t topic_csp_cmd = DDS_ENTITY_NIL;
-    std::atomic<bool> csp_running_{false};
-
-    std::vector<std::array<double, 14>> interpolated_positions_;
+    bool csp_running_ = false;
+    std::vector<std::array<double, 36>> interpolated_positions_;
     std::mutex data_mutex_; 
-};
 
+
+    std::thread csp_thread_;
+    
+};

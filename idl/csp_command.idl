@@ -4,7 +4,7 @@ module zdl {
       
       struct CSPCommand {
         double timestamp;
-        double joint[14];
+        double joint[36];
       };
 
     };
