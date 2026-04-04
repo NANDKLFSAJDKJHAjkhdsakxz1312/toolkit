@@ -29,6 +29,9 @@ UiCmdServer::~UiCmdServer() {
     if (state_thread_.joinable()) {
         state_thread_.join();
     }
+    if (csp_thread_.joinable()) {
+        csp_thread_.join();
+    }
 
     shutdownDds();
     spdlog::info("DDS实体已被销毁");
@@ -48,6 +51,8 @@ bool UiCmdServer::initDds() {
           return false;
       }
       spdlog::info("subscriber created successfully");
+      publisher_ = dds_create_publisher(participant_, NULL, NULL);
+      
       
       listener_ = dds_create_listener(this);
 
@@ -75,7 +80,7 @@ bool UiCmdServer::initDds() {
       dds_lset_publication_matched(listener_, UiCmdServer::on_publication_matched);
 
       reader_start = dds_create_reader(subscriber_, topic_start, qos_start, listener_);
-
+      writer_start_reply = dds_create_writer(publisher_,topic_start,qos_start,nullptr)
       dds_delete_qos(qos_start);
       
 
@@ -85,7 +90,7 @@ bool UiCmdServer::initDds() {
       }
       spdlog::info("reader_start created successfully");
 
-
+    
 
       //停止指令
       topic_stop = dds_create_topic(
@@ -937,79 +942,65 @@ void UiCmdServer::on_subscription_matched(
 
 
 
-void UiCmdServer::handle_start() {
-
+void UiCmdServer::handle_start()
+{
     spdlog::info("start command");
 
     void* samples[1];
     dds_sample_info_t infos[1];
 
     samples[0] = zdl_msg_dds__StartRequest__alloc();
-
     dds_return_t rc = DDS_RETCODE_OK;
 
-    while ((rc = dds_take(reader_start, samples, infos, 1, 1)) > 0) {
-
+    while ((rc = dds_take(reader_start, samples, infos, 1, 1)) > 0)
+    {
         if (!infos[0].valid_data)
             continue;
 
         auto* msg = static_cast<zdl_msg_dds__StartRequest*>(samples[0]);
 
-        // spdlog::info("========== 收到 START 指令 ==========");
+        spdlog::info("========== 收到 START 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
 
-        bool valid = true;
+        controller::StartConfig config;
 
-        switch (msg->config.arm_mode) {
+        
 
-            case zdl_msg_dds__kLeftArmOnly:
-                spdlog::warn("动作模式: 仅左臂");
-                break;
+        // 3) yaml / urdf 路径
+        config.device_yaml_path = "../config/config_data_collection_upper_device.yaml";
+    config.master_yaml_path = "../config/config_data_collection_upper_master.yaml";
+    config.urdf_path = "../data/duo_arm.urdf";
 
-            case zdl_msg_dds__kRightArmOnly:
-                spdlog::warn("动作模式: 仅右臂");
-                break;
+        
+    config.left_arm_direction = {true, true, true, true, true, true, true};
+    config.right_arm_direction = {true, true, true, true, true, true, true};
+      
 
-            case zdl_msg_dds__kDualArm:
-                spdlog::info("动作模式: 双臂协同");
-                break;
+        config.left_arm_type = controller::ArmType::k7Dof;
+        config.right_arm_type = controller::ArmType::k7Dof;
+        config.left_hand_type = controller::HandType::kO7;
+        config.right_hand_type = controller::HandType::kO7;
+        config.head_type = controller::HeadType::kEnable;
+        config.waist_type = controller::WaistType::kListWaist;
+        config.wheel_type = controller::WheelType::kDoubleWheel;
 
-            case zdl_msg_dds__kFoldedWaistOnly:
-                spdlog::warn("动作模式: 仅腰部");
-                break;
+        // 6) part_config 解析
+        config.part_config.clear();
 
-            default:
-                spdlog::error("未知模式: {}", (int)msg->config.arm_mode);
-                valid = false;
-                break;
-        }
+        config.part_config.push_back(controller::RobotParts::kRightArm);
+        config.part_config.push_back(controller::RobotParts::kRightHand);
+        config.part_config.push_back(controller::RobotParts::kLeftArm);
+        config.part_config.push_back(controller::RobotParts::kLeftHand);
+        config.part_config.push_back(controller::RobotParts::kHead);
+        config.part_config.push_back(controller::RobotParts::kLiftWaist);
+        config.part_config.push_back(controller::RobotParts::kDoubleWheel);
 
-        if (valid) {
-
-            zdl::msg::dds_::DdsStartConfig dds_config =
-                zdl::msg::dds_::MakeDefaultStartConfig();
-
-            dds_config.arm_mode = msg->config.arm_mode;
-            dds_config.distance_between_arm = msg->config.distance_between_arm;
-            dds_config.left_end_effector = msg->config.left_end_effector;
-            dds_config.right_end_effector = msg->config.right_end_effector;
-            // ✅ 给 part_config 添加 LeftArm 和 RightArm
-            dds_config.part_config._length = 2;
-            dds_config.part_config._maximum = 2;
-            dds_config.part_config._release = true; // DDS 负责释放缓冲区
-            dds_config.part_config._buffer = dds_sequence_zdl_msg_dds__RobotParts_allocbuf(2);
-            dds_config.part_config._buffer[0] = zdl_msg_dds__kLeftArm;
-            dds_config.part_config._buffer[1] = zdl_msg_dds__kRightArm;
-            controller::StartConfig controller_config =
-                zdl::msg::dds_::ToControllerStartConfig(dds_config);
-
-            if (!robot_) {
-                spdlog::error("robot 未初始化");
-            }
-            else {
-                std::lock_guard<std::mutex> lock(robot_mutex_);
-                robot_->start(controller_config);
-            }
+        // 7) 调用 robot_->connect
+        if (!robot_) {
+            spdlog::error("robot 未初始化");
+        } else {
+            std::lock_guard<std::mutex> lock(robot_mutex_);
+            robot_->connect(config);
         }
 
         spdlog::info("=================================");
@@ -1046,7 +1037,7 @@ void UiCmdServer::handle_stop() {
         
         if (robot_) {
             std::lock_guard<std::mutex> lock(robot_mutex_);
-            robot_->stop();
+            robot_->disconnect();
         }
         else {
             spdlog::error("robot 未初始化");
@@ -1196,7 +1187,7 @@ void UiCmdServer::handle_set_zero_position(){
         
         if (robot_) {
             std::lock_guard<std::mutex> lock(robot_mutex_);
-            robot_->setZeroPosition();
+            robot_->resetZeroPosition();
         }
         else {
             spdlog::error("robot 未初始化");
@@ -1549,10 +1540,15 @@ void UiCmdServer::handle_csp_command()
 
             if (robot_)
             {
-                if (!csp_running_)
+                if (!csp_running_.exchange(true))
                 {
-                    startCSPControl();
-                    csp_running_ = true;
+                    if (csp_thread_.joinable()) {
+                        csp_thread_.join();
+                    }
+                    csp_thread_ = std::thread([this]() {
+                        startCSPControl();
+                        csp_running_ = false;
+                    });
                 }
 
                 interpolator_.receive(msg->timestamp, std::array<double,14>{
@@ -1587,6 +1583,56 @@ void UiCmdServer::handle_csp_command()
 void UiCmdServer::startCSPControl()
 {
     spdlog::info("before runCycleJointMotion");
+    auto cmd_callback =
+      [this](const controller::RobotState& s, controller::Duration time, controller::JointPositionCmd& cmd)
+    {
+        if (!cmd.isInitialized())
+        {
+        cmd.enableRightHand();
+        cmd.enableLeftHand();
+        cmd.enableRightArm();
+        cmd.enableLeftArm();
+        cmd.enableWaistPP();
+        cmd.enableWheel();
+        cmd.setInitialized();
+        }
+        std::array<double, 36> q_interp;
+        bool ok = interpolator_.get(q_interp);
+        if (ok)
+        {
+            std::lock_guard<std::mutex> lock(data_mutex_);
+            interpolated_positions_.push_back(q_interp);
+                spdlog::info("存储了");
+        }
+        if (!ok)
+        {
+            spdlog::warn("插值器无数据，返回当前关节位置");
+            
+            for (int i = 0; i < 7; ++i)
+            {
+                cmd.right_arm.q_d[i] = s.right_arm.q[i];
+                cmd.left_arm.q_d[i]  = s.left_arm.q[i];
+                cmd.right_hand.q_d[i] = s.right_hand.q[i];
+                cmd.left_hand.q_d[i] = s.left_hand.q[i];
+                cmd.waist.q_d[i] = s.waist.q[i];
+                cmd.wheel.q_d[i] = s.wheel.q[i];
+            }
+            
+            
+        }
+
+        for (int i = 0; i < 7; ++i)
+        {
+
+            // spdlog::info("插值结果 - 关节 {}: {:.2f}°", i, q_interp[i]);
+            double l = q_interp[i];
+            double r = q_interp[i + 7];
+            //todo
+            
+        }
+        cmd.right_hand = target;
+        
+    };
     auto motion_callback =
         [this](const controller::RobotState& s,
                controller::Duration time) -> controller::JointPositions

@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(ZDL_SOFTWARE_DIR "/home/root/software/zdl-wanghuo-software")
+set(ZDL_LIB_DIR "/home/root/software/zdl-wanghuo-lib")
 
 # 源文件
 set(SOURCES
@@ -41,7 +42,7 @@ set(CMAKE_PREFIX_PATH
 set(ZdlController_DIR "${ZDL_SOFTWARE_DIR}/lib/cmake/ZdlController")
 
 # 找 包
-find_package(ZdlController REQUIRED)
+find_package(zdl_controller REQUIRED)
 find_package(Eigen3 3.4 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(CycloneDDS REQUIRED)
@@ -59,10 +60,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # 链接库
 target_link_libraries(${PROJECT_NAME}
-    ZdlController::zdl_controller
-    ${ZDL_SOFTWARE_DIR}/lib/libzdl_ecmaster.so
+    zdl_controller::zdl_controller
+
     Eigen3::Eigen
     CycloneDDS::ddsc
-    ${Boost_LIBRARIES}
     spdlog::spdlog
 )
