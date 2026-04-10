@@ -153,11 +153,9 @@ inline void ToDdsRobotState(
     dst.current_mission =
         (zdl_msg_dds__state_CurrentMission)src.current_mission;
 
-    dst.current_arm_mode =
-        (zdl_msg_dds__state_CurrentArmMode)src.current_arm_mode;
-
+    
     // time
-    dst.time = src.time.toSec();
+    dst.time = src.unix_timestamp_us;
 }
 
 

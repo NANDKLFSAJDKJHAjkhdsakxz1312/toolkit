@@ -985,17 +985,10 @@ void UiCmdServer::handle_start()
         config.wheel_type = controller::WheelType::kDoubleWheel;
 
         // 6) part_config 解析
-        config.part_config.clear();
-
-        config.part_config.push_back(controller::RobotParts::kRightArm);
-        config.part_config.push_back(controller::RobotParts::kRightHand);
-        config.part_config.push_back(controller::RobotParts::kLeftArm);
-        config.part_config.push_back(controller::RobotParts::kLeftHand);
-        config.part_config.push_back(controller::RobotParts::kHead);
-        config.part_config.push_back(controller::RobotParts::kFoldedWaist);
-        config.part_config.push_back(controller::RobotParts::kDoubleWheel);
-    
-
+        config.enable_error_code_check = false;
+        config.enable_csp_output_limit = false;
+        
+      
         // 7) 调用 robot_->connect
         if (!robot_) {
             spdlog::error("robot 未初始化");
