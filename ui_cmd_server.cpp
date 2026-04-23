@@ -38,7 +38,7 @@ UiCmdServer::~UiCmdServer() {
 }
 
 bool UiCmdServer::initDds() {
-      participant_ = dds_create_participant(0, NULL, NULL);
+      participant_ = dds_create_participant(200, NULL, NULL);
       if (participant_ < 0) {
           DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-participant_));
           return false;
@@ -967,8 +967,8 @@ void UiCmdServer::handle_start()
         
 
         // 3) yaml / urdf 路径
-        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_device.yaml";
-    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_master.yaml";
+        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_device_arm_hand.yaml";
+    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_arm_hand.yaml";
     config.urdf_path = "/home/root/workspace/zdl-controller-toolkit/data/duo_arm.urdf";
 
         
@@ -1584,14 +1584,14 @@ void UiCmdServer::startCSPControl()
         if (!cmd.isInitialized())
         {
         cmd.enableRightArm();
-        // cmd.enableRightHand();
-        // cmd.enableLeftArm();
-        // cmd.enableLeftHand();
+        cmd.enableRightHand();
+        cmd.enableLeftArm();
+        cmd.enableLeftHand();
         
    
         
         // cmd.enableWaistPP();
-        // cmd.enableWheel();
+        cmd.enableWheel();
         cmd.setInitialized();
         }
         std::array<double, 36> q_interp;
@@ -1643,7 +1643,7 @@ void UiCmdServer::startCSPControl()
         cmd.right_hand.dq_d[5] = 100.0;
         cmd.right_hand.dq_d[6] = 100.0;
 
-        cmd.right_hand.tau_d[0] = 100.0;
+        cmd.right_hand.tau_d[0] = 1.0;
         cmd.right_hand.tau_d[1] = 100.0;
         cmd.right_hand.tau_d[2] = 100.0;
         cmd.right_hand.tau_d[3] = 100.0;
@@ -1674,7 +1674,7 @@ void UiCmdServer::startCSPControl()
         cmd.left_hand.dq_d[5] = 100.0;
         cmd.left_hand.dq_d[6] = 100.0;
 
-        cmd.left_hand.tau_d[0] = 100.0;
+        cmd.left_hand.tau_d[0] = 1.0;
         cmd.left_hand.tau_d[1] = 100.0;
         cmd.left_hand.tau_d[2] = 100.0;
         cmd.left_hand.tau_d[3] = 100.0;

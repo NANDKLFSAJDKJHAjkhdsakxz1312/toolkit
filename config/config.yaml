@@ -1,4 +1,4 @@
-current_config: 6
+current_config: 9
 # 0:自动选择, 1:双臂, 2:左臂, 3:右臂
 
 config:
@@ -25,5 +25,15 @@ config:
  - idx: 6
    config_master_dir: config_single_motor_master.yaml
    config_device_dir: config_single_motor_device.yaml
-  
 
+ - idx: 7
+   config_master_dir: old_master_upbody.yaml
+   config_device_dir: old_device_upbody.yaml
+  
+ - idx: 8
+   config_master_dir: config_new.yaml
+   config_device_dir: config_new_device.yaml
+
+ - idx: 9
+   config_master_dir: config_new_arm_hand.yaml
+   config_device_dir: config_new_device_arm_hand.yaml

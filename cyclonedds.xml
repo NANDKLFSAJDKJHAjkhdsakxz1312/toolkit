@@ -1,5 +1,5 @@
 <CycloneDDS>
-  <Domain>
+  <Domain id="200">
     <General>
       <Interfaces>
         <NetworkInterface name="enP4p65s0"/>
