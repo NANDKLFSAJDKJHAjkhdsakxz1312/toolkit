@@ -19,9 +19,11 @@ typedef enum zdl_msg_dds__state_RobotError
 {
   zdl_msg_dds__state_OK,
   zdl_msg_dds__state_kEmergencyStop,
+  zdl_msg_dds__state_kExternalEmergencyStop,
   zdl_msg_dds__state_kPoseOverLimit,
   zdl_msg_dds__state_kJointOverTemp,
   zdl_msg_dds__state_kEncoderFault,
+  zdl_msg_dds__state_kJointError,
   zdl_msg_dds__state_kCollisionDetected,
   zdl_msg_dds__state_kCommunicationLost
 } zdl_msg_dds__state_RobotError;

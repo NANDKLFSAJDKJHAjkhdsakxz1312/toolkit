@@ -6,12 +6,14 @@ module zdl {
         enum RobotError
         {
           OK,
-          kEmergencyStop,
-          kPoseOverLimit,
-          kJointOverTemp,
-          kEncoderFault,
-          kCollisionDetected,
-          kCommunicationLost
+            kEmergencyStop,          // 急停触发，已连接
+            kExternalEmergencyStop,  // 外部急停触发，已连接
+            kPoseOverLimit,          // 位置超限
+            kJointOverTemp,          // 关节过热
+            kEncoderFault,           // 编码器故障，已连接
+            kJointError,             // 关节错误，已连接
+            kCollisionDetected,      // 碰撞检测
+            kCommunicationLost  
         };
 
         enum CurrentMode

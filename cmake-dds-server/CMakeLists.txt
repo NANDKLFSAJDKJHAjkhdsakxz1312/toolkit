@@ -58,11 +58,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ../include
    
 )
-
+target_link_directories(${PROJECT_NAME} PRIVATE
+    /home/root/software/zdl-wanghuo-lib/lib
+)
 # 链接库
 target_link_libraries(${PROJECT_NAME}
     zdl_controller::zdl_controller
-    
+   
     Eigen3::Eigen
     CycloneDDS::ddsc
     spdlog::spdlog
