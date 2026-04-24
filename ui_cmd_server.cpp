@@ -1587,7 +1587,7 @@ void UiCmdServer::startCSPControl()
         cmd.enableRightHand();
         cmd.enableLeftArm();
         cmd.enableLeftHand();
-        
+        cmd.enableHead();
    
         
         // cmd.enableWaistPP();
