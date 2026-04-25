@@ -987,7 +987,7 @@ void UiCmdServer::handle_start()
         // 6) part_config 解析
         config.enable_error_code_check = false;
         config.enable_csp_output_limit = false;
-        
+        config.enable_encoder_check = false;
       
         // 7) 调用 robot_->connect
         if (!robot_) {
@@ -1591,7 +1591,7 @@ void UiCmdServer::startCSPControl()
    
         
         // cmd.enableWaistPP();
-        cmd.enableWheel();
+        // cmd.enableWheel();
         cmd.setInitialized();
         }
         std::array<double, 36> q_interp;
@@ -1683,7 +1683,8 @@ void UiCmdServer::startCSPControl()
         cmd.left_hand.tau_d[6] = 100.0;
         
         cmd.waist.q_d[0] = q_interp[30];
-
+	cmd.head.q_d[0] = q_interp[28];
+        cmd.head.q_d[1] = q_interp[29];
         cmd.wheel.dq_d = {q_interp[34],q_interp[35]};
         
     };
