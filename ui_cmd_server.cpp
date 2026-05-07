@@ -967,8 +967,8 @@ void UiCmdServer::handle_start()
         
 
         // 3) yaml / urdf 路径
-        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_device_arm_hand.yaml";
-    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_arm_hand.yaml";
+        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_device.yaml";
+    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_master.yaml";
     config.urdf_path = "/home/root/workspace/zdl-controller-toolkit/data/duo_arm.urdf";
 
         
@@ -1537,7 +1537,7 @@ void UiCmdServer::handle_csp_command()
                 if (!csp_running_)
                 {
                     startCSPControl();
-                    csp_running_ = true;
+                    
                 }
 
 
@@ -1691,6 +1691,7 @@ void UiCmdServer::startCSPControl()
     
 
     robot_->runCycleJointMotion(cmd_callback); 
+    csp_running_ = false;
     spdlog::info("after runCycleJointMotion");
 }
 
@@ -1747,6 +1748,7 @@ void UiCmdServer::handle_stop_mission(){
         {
             std::lock_guard<std::mutex> lock(robot_mutex_);
             robot_->stopCurrentMission();
+            csp_running_ = false;
         }
         else
         {

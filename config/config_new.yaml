@@ -1,0 +1,188 @@
+master:
+  id: 0
+  cpu_set: 6
+  frequency: 1000
+
+slaves:
+  - position: 0
+    alias: 0
+    vendor_id: 0x00100000
+    product_code: 0x10f40931
+    name: "IF1100_6SW(IN,X2,X3)_1.4.2.3"
+    need_dc: true
+
+  - position: 1
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 2
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 3
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 4
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 5
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 6
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 7
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 8
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00500202
+    name: "ZDL-Robotics Hand"
+    need_dc: true
+
+  - position: 9
+    alias: 0
+    vendor_id: 0x00100000
+    product_code: 0x10f40932
+    name: "IF1100_6SW(X4,X5,X6)_1.4.2.3"
+    need_dc: true
+
+  - position: 10
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 11
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 12
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 13
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 14
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 15
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 16
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 17
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00500202
+    name: "ZDL-Robotics Hand"
+    need_dc: true
+
+  - position: 18
+    alias: 0
+    vendor_id: 0x00100000
+    product_code: 0x10f40933
+    name: "IF1100_6SW(IN,X7,X8)_1.4.2.3"
+    need_dc: true
+
+  - position: 19
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 20
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 21
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00005001
+    name: "ZDL-Robotics PowerB"
+    need_dc: true
+
+  - position: 22
+    alias: 0
+    vendor_id: 0x0000116d
+    product_code: 0x00004001
+    name: "ZDL-Robotics Driver"
+    need_dc: true
+
+  - position: 23
+    alias: 0
+    vendor_id: 0x000004d8
+    product_code: 0x00009001
+    name: "ZDL-Robotics Driver"
+    need_dc: true
+
+  - position: 24
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+
+  - position: 25
+    alias: 0
+    vendor_id: 0x00522227
+    product_code: 0x00009253
+    name: "Ti5Robot_JointMotor"
+    need_dc: true
+

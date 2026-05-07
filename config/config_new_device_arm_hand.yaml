@@ -1,0 +1,293 @@
+is_self_encoder: false
+spd_log_level: 1 # trace=0, debug=1, info=2, warn=3
+compile_igh_lib: 1 #0:动态库, 1:静态库
+
+joints: #双臂脖子整机(注意，限位是根据关节安装位置来确定的,需要对着实机用滑条确认一下方向)
+# 右臂
+  - joint_id: 0
+    slave_id: 1       # 填写实际的从站ID
+    data_id: 0
+    brand: 1    #关节品牌 0:ZDL-Robotics  1:Ti5Robot 
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 90   #关节角上限
+      lower_limit_deg: -50  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+
+  - joint_id: 1
+    slave_id: 2
+    data_id: 1
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 10   #关节角上限
+      lower_limit_deg: -100  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+
+  - joint_id: 2
+    slave_id: 3
+    data_id: 2
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 90   #关节角上限
+      lower_limit_deg: -90  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+
+  - joint_id: 3
+    slave_id: 4
+    data_id: 3
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 20   #关节角上限
+      lower_limit_deg: -135  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+      
+  - joint_id: 4 
+    slave_id: 5
+    data_id: 4
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 120   #关节角上限
+      lower_limit_deg: -120  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+
+  - joint_id: 5
+    slave_id: 6
+    data_id: 5
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 60   #关节角上限
+      lower_limit_deg: -60  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+
+  - joint_id: 6
+    slave_id: 7
+    data_id: 6
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 70   #关节角上限
+      lower_limit_deg: -70  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+# 左臂
+  - joint_id: 7
+    slave_id: 10       # 填写实际的从站ID
+    data_id: 14
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0  #零位的关节角
+      upper_limit_deg: 50   #关节角上限
+      lower_limit_deg: -90  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+
+  - joint_id: 8
+    slave_id: 11
+    data_id: 15
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 100   #关节角上限
+      lower_limit_deg: -10  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+
+  - joint_id: 9
+    slave_id: 12
+    data_id: 16
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 90   #关节角上限
+      lower_limit_deg: -90  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+
+  - joint_id: 10
+    slave_id: 13
+    data_id: 17
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 135   #关节角上限
+      lower_limit_deg: -20  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+      
+  - joint_id: 11
+    slave_id: 14
+    data_id: 18
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 120   #关节角上限
+      lower_limit_deg: -120  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+
+  - joint_id: 12
+    slave_id: 15
+    data_id: 19
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg:  0  #零位的关节角
+      upper_limit_deg: 60   #关节角上限
+      lower_limit_deg: -60  #关节角下限
+      round_flag: false  # 方向标志（true/false）
+
+  - joint_id: 13
+    slave_id: 16
+    data_id: 20
+    brand: 1
+    joint_params:
+      encoder_type: 0 #编码器类型 双编=0，单编=1
+      bits: 18      #编码器位数
+      ratio: 1      #减速比
+      zero_position_deg: 0   #零位的关节角
+      upper_limit_deg: 70   #关节角上限
+      lower_limit_deg: -70  #关节角下限
+      round_flag: true  # 方向标志（true/false）
+# # 头部
+#   - joint_id: 14
+#     slave_id: 18       # 填写实际的从站ID
+#     data_id: 28
+#     brand: 1
+#     joint_params:
+#       encoder_type: 1 #编码器类型 双编=0，单编=1
+#       bits: 16      #编码器位数
+#       ratio: 51      #减速比
+#       zero_position_deg: 0   #零位的关节角
+#       upper_limit_deg: 360   #关节角上限
+#       lower_limit_deg: -360  #关节角下限
+#       round_flag: false  # 方向标志（true/false）
+
+#   - joint_id: 15
+#     slave_id: 19
+#     data_id: 29
+#     brand: 1
+#     joint_params:
+#       encoder_type: 1 #编码器类型 双编=0，单编=1
+#       bits: 16      #编码器位数
+#       ratio: 51      #减速比
+#       zero_position_deg: 0   #零位的关节角
+#       upper_limit_deg: 360   #关节角上限
+#       lower_limit_deg: -360  #关节角下限
+#       round_flag: true  # 方向标志（true/false）
+# # 腰部
+#   - joint_id: 16
+#     slave_id: 23
+#     data_id: 32
+#     brand: 1
+#     joint_params:
+#       encoder_type: 1 #编码器类型 双编=0，单编=1
+#       bits: 16      #编码器位数
+#       ratio: 101      #减速比
+#       zero_position_deg: 0   #零位的关节角
+#       upper_limit_deg: 360    #关节角上限
+#       lower_limit_deg: -360   #关节角下限
+#       round_flag: true  # 方向标志（true/false）
+
+#   - joint_id: 17
+#     slave_id: 24
+#     data_id: 33
+#     brand: 1
+#     joint_params:
+#       encoder_type: 1 #编码器类型 双编=0，单编=1
+#       bits: 16      #编码器位数
+#       ratio: 101      #减速比
+#       zero_position_deg: 0   #零位的关节角
+#       upper_limit_deg: 18   #关节角上限
+#       lower_limit_deg: -18  #关节角下限
+#       round_flag: true  # 方向标志（true/false）
+
+# # 升降台
+# lifters:
+#   - lifter_id: 0
+#     slave_id: 22
+#     lifter_data_id: 30
+#     lifter_params:
+#       encoder_type: 0 #编码器类型 双编=0，单编=1
+#       bits: 16      #编码器位数
+#       ratio: 10      #减速比 
+#       lead_m_per_r: 0.02  # 导程20mm/r 上升高度=导程(mm/r) * 电机圈数(r)
+#       zero_position_m: 0.0   #高度零位
+#       upper_limit_m: 0.28   #高度上限 0.28m
+#       lower_limit_m: 0.0  #高度下限 0.0m
+
+# 手部
+# hands:
+#   - hand_id: 0
+#     slave_id: 8
+#     hand_data_begin_id: 7
+#     hand_data_end_id: 13
+
+#   - hand_id: 1
+#     slave_id: 17
+#     hand_data_begin_id: 21
+#     hand_data_end_id: 27
+
+
+# 夹爪
+hands:
+  - hand_id: 0
+    slave_id: 8
+    brand: 1
+    hand_data_begin_id: 7
+    hand_data_end_id: 7
+
+  - hand_id: 1
+    slave_id: 17
+    brand: 1
+    hand_data_begin_id: 21
+    hand_data_end_id: 21
+
+powerboards: 
+  - powerboard_id: 0       #powerA
+    slave_id: 20       # 填写实际的从站ID
+
+doublewheels:
+  - doublewheel_id: 0
+    slave_id: 21
+    ratio: 16
+    # left_wheel_data_id: 34
+    # right_wheel_data_id: 35
+    left_data_id: 34
+    right_data_id: 35
