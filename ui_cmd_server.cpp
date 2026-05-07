@@ -967,8 +967,8 @@ void UiCmdServer::handle_start()
         
 
         // 3) yaml / urdf 路径
-        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_device.yaml";
-    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_single_motor_master.yaml";
+        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_device_arm_hand.yaml";
+    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_arm_hand.yaml ";
     config.urdf_path = "/home/root/workspace/zdl-controller-toolkit/data/duo_arm.urdf";
 
         
