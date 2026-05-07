@@ -1,7 +1,7 @@
 is_self_encoder: false
 spd_log_level: 1 # trace=0, debug=1, info=2, warn=3
 compile_igh_lib: 1 #0:动态库, 1:静态库
-hardware_emergency-stop: true
+hardware_emergency_stop: true
 
 joints: #双臂脖子整机(注意，限位是根据关节安装位置来确定的,需要对着实机用滑条确认一下方向)
 # 右臂
