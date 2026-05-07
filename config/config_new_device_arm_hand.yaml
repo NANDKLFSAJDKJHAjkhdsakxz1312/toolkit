@@ -279,9 +279,9 @@ hands:
     hand_data_begin_id: 21
     hand_data_end_id: 21
 
-powerboards: 
-  - powerboard_id: 0       #powerA
-    slave_id: 20       # 填写实际的从站ID
+# powerboards: 
+#   - powerboard_id: 0       #powerA
+#     slave_id: 20       # 填写实际的从站ID
 
 doublewheels:
   - doublewheel_id: 0
