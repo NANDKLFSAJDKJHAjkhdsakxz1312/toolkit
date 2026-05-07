@@ -286,7 +286,7 @@ hands:
 
 doublewheels:
   - doublewheel_id: 0
-    slave_id: 21
+    slave_id: 22
     ratio: 16
     # left_wheel_data_id: 34
     # right_wheel_data_id: 35
