@@ -19,6 +19,7 @@
 #include "idl/stop_mission.h"
 #include "linear_interpolator.h"
 #include "idl/csp_command.h"
+#include <yaml-cpp/yaml.h>
 #include <thread>
 #include <atomic>
 

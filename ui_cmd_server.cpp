@@ -964,12 +964,38 @@ void UiCmdServer::handle_start()
 
         controller::StartConfig config;
 
-        
+        const std::string config_base = "/home/root/workspace/zdl-controller-toolkit/config";
+        const std::string config_yaml_path = config_base + "/config.yaml";
 
-        // 3) yaml / urdf 路径
-        config.device_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_device_arm_hand.yaml";
-    config.master_yaml_path = "/home/root/workspace/zdl-controller-toolkit/config/config_new_arm_hand.yaml";
-    config.urdf_path = "/home/root/workspace/zdl-controller-toolkit/data/duo_arm.urdf";
+        try {
+            YAML::Node cfg = YAML::LoadFile(config_yaml_path);
+            int current_idx = cfg["current_config"].as<int>();
+
+            const YAML::Node& configs = cfg["config"];
+            bool found = false;
+            for (const auto& item : configs) {
+                if (item["idx"].as<int>() == current_idx) {
+                    std::string master_file = item["config_master_dir"].as<std::string>();
+                    std::string device_file = item["config_device_dir"].as<std::string>();
+                    config.master_yaml_path = config_base + "/" + master_file;
+                    config.device_yaml_path = config_base + "/" + device_file;
+                    spdlog::info("从 config.yaml 读取配置 idx={}, master={}, device={}",
+                                 current_idx, master_file, device_file);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                spdlog::error("config.yaml 中未找到 idx={} 的配置，使用默认值", current_idx);
+                config.master_yaml_path = config_base + "/config_single_motor_master.yaml";
+                config.device_yaml_path = config_base + "/config_single_motor_device.yaml";
+            }
+        } catch (const std::exception& e) {
+            spdlog::error("读取 config.yaml 失败: {}，使用默认配置", e.what());
+            config.master_yaml_path = config_base + "/config_single_motor_master.yaml";
+            config.device_yaml_path = config_base + "/config_single_motor_device.yaml";
+        }
+        config.urdf_path = "/home/root/workspace/zdl-controller-toolkit/data/duo_arm.urdf";
 
         
     config.left_arm_direction = {true, true, true, true, true, true, true};
@@ -1537,7 +1563,6 @@ void UiCmdServer::handle_csp_command()
                 if (!csp_running_)
                 {
                     startCSPControl();
-                    
                 }
 
 
