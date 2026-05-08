@@ -1562,9 +1562,13 @@ void UiCmdServer::handle_csp_command()
             {
                 if (!csp_running_)
                 {
-                    startCSPControl();
+                    if (csp_thread_.joinable())
+                        csp_thread_.join();
+                    csp_running_ = true;
+                    csp_thread_ = std::thread([this]() {
+                        startCSPControl();
+                    });
                 }
-
 
                 interpolator_.receive(msg->timestamp, std::array<double,36>{
                     msg->joint[0],  msg->joint[1],  msg->joint[2],  msg->joint[3],
@@ -1716,7 +1720,7 @@ void UiCmdServer::startCSPControl()
     
 
     robot_->runCycleJointMotion(cmd_callback); 
-    csp_running_ = false;
+    // csp_running_ = false;
     spdlog::info("after runCycleJointMotion");
 }
 
