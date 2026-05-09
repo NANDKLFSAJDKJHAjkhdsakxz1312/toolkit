@@ -33,6 +33,9 @@ UiCmdServer::~UiCmdServer() {
         csp_thread_.join();
     }
 
+    if (robot_) {
+        robot_->disconnect();
+    }
     shutdownDds();
     spdlog::info("DDS实体已被销毁");
 }
