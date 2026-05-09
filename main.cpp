@@ -2,14 +2,25 @@
 
 #include <thread>
 #include <chrono>
+#include <csignal>
+#include <atomic>
+
+std::atomic<bool> g_running{true};
+
+void signal_handler(int) {
+    g_running = false;
+}
 
 int main() {
-      UiCmdServer dds_server;
+    std::signal(SIGINT, signal_handler);
+    std::signal(SIGTERM, signal_handler);
 
-      while (true) {
-          //dds_server.log_match_status();
-          std::this_thread::sleep_for(std::chrono::seconds(1));
-      }
+    UiCmdServer dds_server;
 
-      return 0;
+    while (g_running) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    spdlog::info("收到退出信号，正在清理...");
+    return 0;
 }
