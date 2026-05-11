@@ -1749,18 +1749,22 @@ void UiCmdServer::exportInterpolatedPositions(const std::string& filename)
 
 
 
-void UiCmdServer::handle_stop_mission(){
+void UiCmdServer::handle_stop_mission() {
     void* samples[1];
     dds_sample_info_t infos[1];
 
     samples[0] = zdl_msg_dds__StopMissionRequest__alloc();
+    if (!samples[0]) {
+        spdlog::error("StopMissionRequest alloc failed");
+        return;
+    }
 
-    dds_return_t rc;
+    dds_return_t rc = DDS_RETCODE_OK;
 
-    while ((rc = dds_take(reader_stop_mission, samples, infos, 1, 1)) > 0)
-    {
-        if (!infos[0].valid_data)
+    while ((rc = dds_take(reader_stop_mission, samples, infos, 1, 1)) > 0) {
+        if (!infos[0].valid_data) {
             continue;
+        }
 
         auto* msg = static_cast<zdl_msg_dds__StopMissionRequest*>(samples[0]);
 
@@ -1768,19 +1772,22 @@ void UiCmdServer::handle_stop_mission(){
         spdlog::info("========== 收到 Stop Mission 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
 
-        if (robot_)
-        {
-            std::lock_guard<std::mutex> lock(robot_mutex_);
-            robot_->stopCurrentMission();
-            csp_running_ = false;
-        }
-        else
-        {
+        if (robot_) {
+            {
+                std::lock_guard<std::mutex> lock(robot_mutex_);
+                robot_->stopCurrentMission();
+            }
+            csp_running_ = false;  // 若多线程访问，建议改成 atomic<bool>
+        } else {
             spdlog::error("robot 未初始化");
         }
 
         spdlog::info("=================================");
     }
 
+    if (rc < 0) {
+        spdlog::error("dds_take failed: {}", dds_strretcode(-rc));
+    }
 
+    zdl_msg_dds__StopMissionRequest_free(samples[0], DDS_FREE_ALL);
 }
