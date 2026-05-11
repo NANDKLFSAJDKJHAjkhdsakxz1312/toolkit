@@ -25,7 +25,6 @@ UiCmdServer::UiCmdServer() {
 
 UiCmdServer::~UiCmdServer() {
     running_ = false;
-
     if (state_thread_.joinable()) {
         state_thread_.join();
     }
@@ -33,9 +32,7 @@ UiCmdServer::~UiCmdServer() {
         csp_thread_.join();
     }
 
-    if (robot_) {
-        robot_->disconnect();
-    }
+    
     shutdownDds();
     spdlog::info("DDS实体已被销毁");
 }
@@ -947,8 +944,6 @@ void UiCmdServer::on_subscription_matched(
 
 void UiCmdServer::handle_start()
 {
-    spdlog::info("start command");
-
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -962,6 +957,7 @@ void UiCmdServer::handle_start()
 
         auto* msg = static_cast<zdl_msg_dds__StartRequest*>(samples[0]);
 
+        spdlog::info("start command");
         spdlog::info("========== 收到 START 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
 
@@ -1039,8 +1035,6 @@ void UiCmdServer::handle_start()
 
 void UiCmdServer::handle_stop() {
 
-    spdlog::info("stop command");
-
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -1054,6 +1048,8 @@ void UiCmdServer::handle_stop() {
             continue;
 
         auto* msg = static_cast<zdl_msg_dds__StopRequest*>(samples[0]);
+
+        spdlog::info("stop command");
 
         // spdlog::info("========== 收到 STOP 指令 ==========");
         // spdlog::info("request_id={}", msg->request_id);
@@ -1189,8 +1185,6 @@ void UiCmdServer::handle_disable(){
 
 
 void UiCmdServer::handle_set_zero_position(){
-    spdlog::info("set_zero_position command");
-
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -1205,6 +1199,7 @@ void UiCmdServer::handle_set_zero_position(){
 
         auto* msg = static_cast<zdl_msg_dds__SetZeroPositionRequest*>(samples[0]);
 
+        spdlog::info("set_zero_position command");
         spdlog::info("========== 收到 Set_zero_position 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
         
@@ -1228,10 +1223,6 @@ void UiCmdServer::handle_set_zero_position(){
 
 
 void UiCmdServer::handle_return_zero(){
-    spdlog::info("return_zero command");
-    auto state = robot_->getRobotState();
-    spdlog::info("当前状态：{}",static_cast<int>(state.current_mission));
-    spdlog::info("当前模式：{}",static_cast<int>(state.current_mode));
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -1246,6 +1237,10 @@ void UiCmdServer::handle_return_zero(){
 
         auto* msg = static_cast<zdl_msg_dds__ReturnZeroRequest*>(samples[0]);
 
+        spdlog::info("return_zero command");
+        auto state = robot_->getRobotState();
+        spdlog::info("当前状态：{}",static_cast<int>(state.current_mission));
+        spdlog::info("当前模式：{}",static_cast<int>(state.current_mode));
         spdlog::info("========== 收到 Return_zero 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
         
@@ -1273,8 +1268,6 @@ void UiCmdServer::handle_return_zero(){
 
 void UiCmdServer::handle_jog_command()
 {
-    spdlog::info("jog_command received");
-
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -1289,6 +1282,7 @@ void UiCmdServer::handle_jog_command()
 
         auto* msg = static_cast<zdl_msg_dds__JogCommand*>(samples[0]);
 
+        spdlog::info("jog_command received");
         spdlog::info("========== 收到 Jog Command ==========");
 
         int joint_id = msg->joint_id;
@@ -1499,8 +1493,6 @@ void UiCmdServer::handle_publication_matched(
 
 
 void UiCmdServer::handle_e_stop(){
-    spdlog::info("e_stop received");
-
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -1515,6 +1507,7 @@ void UiCmdServer::handle_e_stop(){
 
         auto* msg = static_cast<zdl_msg_dds__EStopRequest*>(samples[0]);
 
+        spdlog::info("e_stop received");
         spdlog::info("========== 收到 E-STOP 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
 
@@ -1757,8 +1750,6 @@ void UiCmdServer::exportInterpolatedPositions(const std::string& filename)
 
 
 void UiCmdServer::handle_stop_mission(){
-    spdlog::info("stop_mission received");
-
     void* samples[1];
     dds_sample_info_t infos[1];
 
@@ -1773,6 +1764,7 @@ void UiCmdServer::handle_stop_mission(){
 
         auto* msg = static_cast<zdl_msg_dds__StopMissionRequest*>(samples[0]);
 
+        spdlog::info("stop_mission received");
         spdlog::info("========== 收到 Stop Mission 指令 ==========");
         spdlog::info("request_id={}", msg->request_id);
 
