@@ -117,7 +117,7 @@ private:
     LinearInterpolator interpolator_;
     dds_entity_t reader_csp_cmd = DDS_ENTITY_NIL;
     dds_entity_t topic_csp_cmd = DDS_ENTITY_NIL;
-    bool csp_running_ = false;
+    std::atomic<bool> csp_running_{false};
     std::vector<std::array<double, 36>> interpolated_positions_;
     std::mutex data_mutex_; 
 
