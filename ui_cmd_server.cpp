@@ -51,8 +51,6 @@ bool UiCmdServer::initDds() {
           return false;
       }
       spdlog::info("subscriber created successfully");
-      publisher_ = dds_create_publisher(participant_, NULL, NULL);
-      
       
       listener_ = dds_create_listener(this);
 
